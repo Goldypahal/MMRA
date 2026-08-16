@@ -117,7 +117,7 @@ async def run(model_id: str, category: str | None, difficulty: str | None):
             response_text = resp.text if resp.success else ""
             grade = await score_response(t, response_text)
             score = grade["score"]
-            tokens = resp.tokens_used
+            tokens = resp.tokens_total
             latency = resp.latency_ms
             
             # Save to MMRA database
