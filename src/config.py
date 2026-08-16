@@ -14,6 +14,9 @@ load_dotenv()
 # ── API ──────────────────────────────────────────────────────────────────────
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+GLM_API_KEY: str = os.getenv("GLM_API_KEY", "")
+GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 
 # ── Model Registry ────────────────────────────────────────────────────────────
 @dataclass
@@ -24,13 +27,14 @@ class ModelConfig:
     api_key: str          # primary model identifier on OpenRouter
     color: str            # rich markup color
     fallback_api_keys: list[str] = field(default_factory=list)
+    provider_api_key: str = ""  # dedicated provider API key if supplied
 
 
 MODELS: Dict[str, ModelConfig] = {
     "A": ModelConfig("A", "Nemotron-3-Ultra", "Nemotron", "nvidia/nemotron-3-ultra-550b-a55b:free", "bold blue",   fallback_api_keys=["nvidia/nemotron-3-super-120b-a12b:free"]),
-    "B": ModelConfig("B", "Gemma-4-31B",       "Gemma",    "google/gemma-4-31b-it:free",         "bold green",  fallback_api_keys=["google/gemma-4-26b-a4b-it:free"]),
-    "C": ModelConfig("C", "GLM-4.5-Air",       "GLM",      "z-ai/glm-4.5-air:free",              "bold yellow", fallback_api_keys=["cohere/north-mini-code:free"]),
-    "D": ModelConfig("D", "GPT-OSS-20B",       "GPT-OSS",  "openai/gpt-oss-20b:free",             "bold red",    fallback_api_keys=["nvidia/nemotron-3.5-lightning:free"]),
+    "B": ModelConfig("B", "Gemma-4-31B",       "Gemma",    "google/gemma-4-31b-it:free",         "bold green",  fallback_api_keys=["google/gemma-4-26b-a4b-it:free"], provider_api_key=GEMINI_API_KEY),
+    "C": ModelConfig("C", "GLM-4.5-Air",       "GLM",      "z-ai/glm-4.5-air:free",              "bold yellow", fallback_api_keys=["cohere/north-mini-code:free"], provider_api_key=GLM_API_KEY),
+    "D": ModelConfig("D", "GPT-OSS-20B",       "GPT-OSS",  "openai/gpt-oss-20b:free",             "bold red",    fallback_api_keys=["nvidia/nemotron-3.5-lightning:free"], provider_api_key=OPENAI_API_KEY),
 }
 
 C1_C2_MODEL: str = "A"
