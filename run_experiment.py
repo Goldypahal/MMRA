@@ -23,7 +23,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from src.config import CONDITIONS, CATEGORIES, MODELS
-from src.tasks import ALL_TASKS, get_tasks_by_category, get_task_subset
+from src.tasks import ALL_TASKS, get_tasks_by_category, get_task_subset, get_dataset
 from src.conditions import run_condition, TaskResult
 from src.database import init_db, save_result, get_completed_combos, summary_stats, clear_db
 from src.display import (
@@ -131,6 +131,9 @@ Examples:
                         help="Which conditions to run (default: all)")
     parser.add_argument("--n", type=int, default=None,
                         help="Limit to first N tasks (for quick testing)")
+    parser.add_argument("--dataset", type=str, default="standard",
+                        choices=["standard", "extended", "all"],
+                        help="Which dataset to run: 'standard' (140 tasks), 'extended' (70 adversarial tasks), or 'all' (210 tasks)")
     parser.add_argument("--category", type=str, default=None,
                         choices=list(CATEGORIES.keys()),
                         help="Run only tasks from this category")
@@ -165,14 +168,14 @@ async def main():
 
     # Select tasks
     if args.category:
-        tasks = get_tasks_by_category(args.category)
+        tasks = get_tasks_by_category(args.category, dataset=args.dataset)
         if args.n:
             tasks = tasks[:args.n]
     else:
         if args.n:
-            tasks = get_task_subset(args.n)
+            tasks = get_task_subset(args.n, dataset=args.dataset)
         else:
-            tasks = ALL_TASKS
+            tasks = get_dataset(args.dataset)
 
     # Show plan
     print_section("Experiment Plan")

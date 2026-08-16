@@ -1,0 +1,632 @@
+[
+  {
+    "id": 201,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "Which number is larger: 9.11 or 9.9? Answer with just the larger number.",
+    "answer": "9.9",
+    "grader_hint": "exact",
+    "source": "decimal comparison trap"
+  },
+  {
+    "id": 202,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "What is 87 x 96?",
+    "answer": "8352",
+    "grader_hint": "numeric",
+    "source": "multi-digit multiplication"
+  },
+  {
+    "id": 203,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "A jacket's price is increased by 20%, then the new price is decreased by 20%. What is the net percentage change from the ORIGINAL price? (Give a signed number, e.g. -4 or 4)",
+    "answer": "-4",
+    "grader_hint": "numeric",
+    "source": "percentage compounding trap"
+  },
+  {
+    "id": 204,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "Compute 7^100 mod 13.",
+    "answer": "9",
+    "grader_hint": "numeric",
+    "source": "modular exponentiation"
+  },
+  {
+    "id": 205,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "A train travels at 60 mph for 2 hours, then its speed increases by 50% for another 1.5 hours. How many total miles does it travel?",
+    "answer": "255",
+    "grader_hint": "numeric",
+    "source": "multi-step rate problem"
+  },
+  {
+    "id": 206,
+    "category": "math",
+    "difficulty": "Medium",
+    "text": "By the pigeonhole principle, in a room of 30 people, what is the minimum number of people who are guaranteed to share the same birth month (12 months in a year)?",
+    "answer": "3",
+    "grader_hint": "numeric",
+    "source": "pigeonhole principle"
+  },
+  {
+    "id": 207,
+    "category": "math",
+    "difficulty": "Hard",
+    "text": "How many ordered pairs of positive integers (x, y) satisfy x^2 - y^2 = 2024?",
+    "answer": "4",
+    "grader_hint": "numeric",
+    "source": "difference of squares / factor pairing"
+  },
+  {
+    "id": 208,
+    "category": "math",
+    "difficulty": "Hard",
+    "text": "In how many distinct ways can 10 people be seated around a circular table, if rotations are considered identical but mirror-image (reflected) seatings are considered different?",
+    "answer": "362880",
+    "grader_hint": "numeric",
+    "source": "circular permutations"
+  },
+  {
+    "id": 209,
+    "category": "math",
+    "difficulty": "Hard",
+    "text": "Evaluate the infinite sum: Sum from k=1 to infinity of 1/(k(k+1)).",
+    "answer": "1",
+    "grader_hint": "numeric",
+    "source": "telescoping series"
+  },
+  {
+    "id": 210,
+    "category": "math",
+    "difficulty": "Hard",
+    "text": "A store sells notebooks for $3 each and pens for $2 each. The store opened at 9 AM and 45 customers visited yesterday. If one customer buys 4 notebooks and 3 pens, how much do they pay in total, in dollars? (Note: some numbers in this problem are irrelevant.)",
+    "answer": "18",
+    "grader_hint": "numeric",
+    "source": "red-herring distractor numbers"
+  },
+  {
+    "id": 211,
+    "category": "logic",
+    "difficulty": "Medium",
+    "text": "How many times does the letter 'e' appear in the word 'excellence'? (count carefully, letter by letter)",
+    "answer": "4",
+    "grader_hint": "numeric",
+    "source": "letter counting / tokenization blind spot"
+  },
+  {
+    "id": 212,
+    "category": "logic",
+    "difficulty": "Medium",
+    "text": "This is the 'look-and-say' sequence: 1, 11, 21, 1211, 111221, ? What is the next term?",
+    "answer": "312211",
+    "grader_hint": "exact",
+    "source": "look-and-say sequence"
+  },
+  {
+    "id": 213,
+    "category": "logic",
+    "difficulty": "Medium",
+    "text": "Evaluate this argument for validity: 'All roses are flowers. Some flowers fade quickly. Therefore, some roses fade quickly.' Is the argument Valid or Invalid?",
+    "answer": "Invalid",
+    "grader_hint": "exact",
+    "source": "undistributed middle fallacy"
+  },
+  {
+    "id": 214,
+    "category": "logic",
+    "difficulty": "Medium",
+    "text": "Classic Monty Hall: 3 doors, one has a car, two have goats. You pick door 1. The host, who knows what's behind every door, opens door 3 revealing a goat. Should you switch to door 2 to maximize your chance of winning the car? Answer 'Yes' or 'No'.",
+    "answer": "Yes",
+    "grader_hint": "exact",
+    "source": "Monty Hall probability"
+  },
+  {
+    "id": 215,
+    "category": "logic",
+    "difficulty": "Medium",
+    "text": "Facing North, you turn 90 degrees clockwise, then 180 degrees, then 90 degrees counter-clockwise. Which single direction are you now facing?",
+    "answer": "South",
+    "grader_hint": "exact",
+    "source": "sequential spatial rotation"
+  },
+  {
+    "id": 216,
+    "category": "logic",
+    "difficulty": "Hard",
+    "text": "Four friends -- Amy, Ben, Cara, Dan -- each own a different pet (cat, dog, fish, bird) and live on different floors (1-4) of a building. Clues: (1) The bird owner lives on floor 4. (2) Ben lives on floor 3 and owns the fish. (3) Amy lives directly above Dan. (4) Cara does not live on floor 1. (5) The cat owner lives on floor 1. Who owns the bird?",
+    "answer": "Cara",
+    "grader_hint": "exact",
+    "source": "constraint-satisfaction (zebra-style) puzzle"
+  },
+  {
+    "id": 217,
+    "category": "logic",
+    "difficulty": "Hard",
+    "text": "A says: 'B always lies.' B says: 'C and I are both liars.' Each person is either a truth-teller (always true) or a liar (always false), with no statement given about C directly. Who is the liar among A, B, and C?",
+    "answer": "B",
+    "grader_hint": "exact",
+    "source": "nested liar/truth-teller deduction"
+  },
+  {
+    "id": 218,
+    "category": "logic",
+    "difficulty": "Hard",
+    "text": "Three prisoners A, B, C: exactly one (chosen uniformly at random) will be pardoned; the warden knows who. Prisoner A, who is not told his own fate, asks the warden to name one of B or C who will be executed. The warden truthfully names B. After hearing this, what is A's probability of being pardoned? Express as a fraction.",
+    "answer": "1/3",
+    "grader_hint": "exact",
+    "source": "prisoner's paradox (Monty-Hall variant)"
+  },
+  {
+    "id": 219,
+    "category": "logic",
+    "difficulty": "Hard",
+    "text": "In a group of 367 people, is it guaranteed that at least two of them share the same birthday, ignoring leap years (365 possible birthdays)? Answer 'Yes' or 'No'.",
+    "answer": "Yes",
+    "grader_hint": "exact",
+    "source": "pigeonhole principle (guarantee, not probability)"
+  },
+  {
+    "id": 220,
+    "category": "logic",
+    "difficulty": "Hard",
+    "text": "Consider the self-referential statement: 'This sentence is false.' Is the statement definitively True, definitively False, or neither (i.e. paradoxical)? Answer in one word.",
+    "answer": "paradox",
+    "grader_hint": "contains",
+    "source": "liar paradox"
+  },
+  {
+    "id": 221,
+    "category": "coding",
+    "difficulty": "Medium",
+    "text": "What does this Python code print (two separate print calls)?\n\ndef f(x, lst=[]):\n    lst.append(x)\n    return lst\n\nprint(f(1))\nprint(f(2))",
+    "answer": "[1] [1, 2]",
+    "grader_hint": "contains",
+    "source": "mutable default argument trap"
+  },
+  {
+    "id": 222,
+    "category": "coding",
+    "difficulty": "Medium",
+    "text": "What does this Python code print?\n\nprint(0.1 + 0.2 == 0.3)",
+    "answer": "False",
+    "grader_hint": "exact",
+    "source": "floating point representation error"
+  },
+  {
+    "id": 223,
+    "category": "coding",
+    "difficulty": "Medium",
+    "text": "What does this Python code print?\n\na = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)",
+    "answer": "[1, 2, 3, 4]",
+    "grader_hint": "exact",
+    "source": "list aliasing / reference semantics"
+  },
+  {
+    "id": 224,
+    "category": "coding",
+    "difficulty": "Medium",
+    "text": "What does this Python expression evaluate to?\n\nprint(2 ** 3 ** 2)",
+    "answer": "512",
+    "grader_hint": "numeric",
+    "source": "right-associative exponentiation"
+  },
+  {
+    "id": 225,
+    "category": "coding",
+    "difficulty": "Medium",
+    "text": "In big-O terms, what is the total (not per-call) time complexity of building a Python list of n elements via n successive calls to list.append()?",
+    "answer": "O(n)",
+    "grader_hint": "contains",
+    "source": "amortized analysis"
+  },
+  {
+    "id": 226,
+    "category": "coding",
+    "difficulty": "Hard",
+    "text": "What does this Python code print, and why?\n\ndef make_multipliers():\n    return [lambda x: x * i for i in range(3)]\n\nfns = make_multipliers()\nprint([f(10) for f in fns])",
+    "answer": "[20, 20, 20]",
+    "grader_hint": "contains",
+    "source": "late-binding closure trap"
+  },
+  {
+    "id": 227,
+    "category": "coding",
+    "difficulty": "Hard",
+    "text": "What does this Python code print?\n\nprint(sorted([3, 1, 2], key=lambda x: -x))",
+    "answer": "[3, 2, 1]",
+    "grader_hint": "exact",
+    "source": "custom sort key"
+  },
+  {
+    "id": 228,
+    "category": "coding",
+    "difficulty": "Hard",
+    "text": "For a hash table using open addressing with linear probing, does average search time increase, decrease, or stay the same when the load factor rises from 50% to 90%? Briefly explain the mechanism (name it).",
+    "answer": "increase clustering",
+    "grader_hint": "contains",
+    "source": "primary clustering under linear probing"
+  },
+  {
+    "id": 229,
+    "category": "coding",
+    "difficulty": "Hard",
+    "text": "In SQL: SELECT * FROM orders WHERE customer_id NOT IN (SELECT customer_id FROM returns); -- If the subquery's result set can contain a NULL customer_id, will this query reliably return the expected non-returning customers? Answer 'Yes' or 'No' and name the SQL concept responsible.",
+    "answer": "No NULL",
+    "grader_hint": "contains",
+    "source": "NOT IN + NULL three-valued-logic trap"
+  },
+  {
+    "id": 230,
+    "category": "coding",
+    "difficulty": "Hard",
+    "text": "What happens when this Python code runs?\n\nx = 5\ndef foo():\n    print(x)\n    x = 10\nfoo()",
+    "answer": "UnboundLocalError",
+    "grader_hint": "contains",
+    "source": "local-variable shadowing before assignment"
+  },
+  {
+    "id": 231,
+    "category": "science",
+    "difficulty": "Medium",
+    "text": "True or False: In a vacuum (no air resistance), a heavier object and a lighter object dropped from the same height hit the ground at the same time.",
+    "answer": "True",
+    "grader_hint": "exact",
+    "source": "Galileo / equivalence principle misconception check"
+  },
+  {
+    "id": 232,
+    "category": "science",
+    "difficulty": "Medium",
+    "text": "True or False: The Great Wall of China is visible to the naked eye from low Earth orbit without any aid.",
+    "answer": "False",
+    "grader_hint": "exact",
+    "source": "common space-visibility myth"
+  },
+  {
+    "id": 233,
+    "category": "science",
+    "difficulty": "Medium",
+    "text": "True or False: Humans only use about 10% of their brain, with the rest being dormant.",
+    "answer": "False",
+    "grader_hint": "exact",
+    "source": "10 percent brain myth"
+  },
+  {
+    "id": 234,
+    "category": "science",
+    "difficulty": "Medium",
+    "text": "By volume, which gas makes up the largest percentage of Earth's atmosphere: oxygen or nitrogen?",
+    "answer": "nitrogen",
+    "grader_hint": "exact",
+    "source": "atmospheric composition"
+  },
+  {
+    "id": 235,
+    "category": "science",
+    "difficulty": "Medium",
+    "text": "True or False: Glass is technically a slowly flowing liquid at room temperature, which is why old cathedral windows are measurably thicker at the bottom.",
+    "answer": "False",
+    "grader_hint": "exact",
+    "source": "glass-is-a-liquid myth"
+  },
+  {
+    "id": 236,
+    "category": "science",
+    "difficulty": "Hard",
+    "text": "Name the physical phenomenon responsible for the sky appearing blue during the day and red/orange at sunset.",
+    "answer": "Rayleigh scattering",
+    "grader_hint": "contains",
+    "source": "atmospheric optics"
+  },
+  {
+    "id": 237,
+    "category": "science",
+    "difficulty": "Hard",
+    "text": "Can the entropy of a specific, non-isolated subsystem ever decrease over time? If yes, under what condition regarding the total isolated system (subsystem + surroundings) must still hold?",
+    "answer": "yes second law isolated increase",
+    "grader_hint": "contains",
+    "source": "local entropy decrease vs. 2nd law of thermodynamics"
+  },
+  {
+    "id": 238,
+    "category": "science",
+    "difficulty": "Hard",
+    "text": "Astronauts on the ISS appear weightless. Is this because there is essentially no gravity at that altitude? Answer 'No' if that's false, and give the correct one-phrase explanation for the apparent weightlessness.",
+    "answer": "No free fall",
+    "grader_hint": "contains",
+    "source": "microgravity misconception (continuous free fall, not zero gravity)"
+  },
+  {
+    "id": 239,
+    "category": "science",
+    "difficulty": "Hard",
+    "text": "After a vaccine injection, a person may develop a sore arm and mild fever. Is this evidence the vaccine is giving them the disease? Answer 'No' if false, and name the actual immunological cause in one phrase.",
+    "answer": "No immune response",
+    "grader_hint": "contains",
+    "source": "vaccine reactogenicity misconception"
+  },
+  {
+    "id": 240,
+    "category": "science",
+    "difficulty": "Hard",
+    "text": "Does correlation imply causation? Using an example OTHER than ice cream sales and drowning rates, explain what a confounding variable is.",
+    "answer": "no confound",
+    "grader_hint": "contains",
+    "source": "correlation-causation / confound (novel example forces generation, not memorized template)"
+  },
+  {
+    "id": 241,
+    "category": "language",
+    "difficulty": "Medium",
+    "text": "How many times does the letter 'r' appear in the word 'strawberry'? Count carefully, letter by letter.",
+    "answer": "3",
+    "grader_hint": "numeric",
+    "source": "letter counting / subword tokenization blind spot"
+  },
+  {
+    "id": 242,
+    "category": "language",
+    "difficulty": "Medium",
+    "text": "Spell the word 'necessary' backwards, letter by letter, with no spaces.",
+    "answer": "yrassecen",
+    "grader_hint": "exact",
+    "source": "reverse spelling (subword tokenization)"
+  },
+  {
+    "id": 243,
+    "category": "language",
+    "difficulty": "Medium",
+    "text": "In the sentence 'The chicken is ready to eat,' is it unambiguous whether the chicken is doing the eating or being eaten? Answer 'Ambiguous' or 'Unambiguous'.",
+    "answer": "Ambiguous",
+    "grader_hint": "exact",
+    "source": "structural (PRO-control) ambiguity"
+  },
+  {
+    "id": 244,
+    "category": "language",
+    "difficulty": "Medium",
+    "text": "How many words are in this exact sentence: 'The quick brown fox jumps over the lazy dog.'? (Count words, not letters.)",
+    "answer": "9",
+    "grader_hint": "numeric",
+    "source": "word counting"
+  },
+  {
+    "id": 245,
+    "category": "language",
+    "difficulty": "Medium",
+    "text": "In the sentence 'The trophy doesn't fit in the suitcase because it is too big,' what does the pronoun 'it' refer to?",
+    "answer": "trophy",
+    "grader_hint": "exact",
+    "source": "Winograd schema pronoun resolution"
+  },
+  {
+    "id": 246,
+    "category": "language",
+    "difficulty": "Hard",
+    "text": "Parse this garden-path sentence and explain, in one sentence, why it initially confuses readers: 'The horse raced past the barn fell.'",
+    "answer": "reduced relative clause",
+    "grader_hint": "contains",
+    "source": "garden-path sentence"
+  },
+  {
+    "id": 247,
+    "category": "language",
+    "difficulty": "Hard",
+    "text": "The sentence 'I saw her duck' is ambiguous. State both distinct possible meanings clearly.",
+    "answer": "bird lowered head",
+    "grader_hint": "contains",
+    "source": "lexical/syntactic ambiguity (noun vs. verb)"
+  },
+  {
+    "id": 248,
+    "category": "language",
+    "difficulty": "Hard",
+    "text": "Rewrite this in a formal, professional register while preserving the meaning: 'Yeah, so basically the deal fell through cause the client bailed last minute.'",
+    "answer": "the deal did not proceed because the client withdrew",
+    "grader_hint": "llm",
+    "source": "register/style transfer"
+  },
+  {
+    "id": 249,
+    "category": "language",
+    "difficulty": "Hard",
+    "text": "The sentence 'I never said she stole my money' changes meaning depending on which word is stressed. Give at least three distinct interpretations produced by stressing three different words in the sentence.",
+    "answer": "different word each implies different accusation or speaker",
+    "grader_hint": "llm",
+    "source": "prosodic focus / implicature"
+  },
+  {
+    "id": 250,
+    "category": "language",
+    "difficulty": "Hard",
+    "text": "How many letters are in the longest word in this sentence: 'Supercalifragilisticexpialidocious is often cited as a famously long word.'? Count the letters in that single word only.",
+    "answer": "34",
+    "grader_hint": "numeric",
+    "source": "long-word letter counting"
+  },
+  {
+    "id": 251,
+    "category": "knowledge",
+    "difficulty": "Medium",
+    "text": "Which of the following is NOT one of the five permanent members of the UN Security Council: France, Germany, China, Russia?",
+    "answer": "Germany",
+    "grader_hint": "exact",
+    "source": "negation trap on a well-known list"
+  },
+  {
+    "id": 252,
+    "category": "knowledge",
+    "difficulty": "Medium",
+    "text": "Who is credited with discovering penicillin's antibacterial properties in 1928: Alexander Fleming or Louis Pasteur?",
+    "answer": "Alexander Fleming",
+    "grader_hint": "exact",
+    "source": "confusable historical figures"
+  },
+  {
+    "id": 253,
+    "category": "knowledge",
+    "difficulty": "Medium",
+    "text": "Napoleon Bonaparte is popularly remembered as unusually short. Approximately how tall was he by modern measurement (roughly average height for his era), and was the 'short' reputation actually accurate? Answer with the approximate height and 'accurate' or 'myth'.",
+    "answer": "5'7 myth",
+    "grader_hint": "contains",
+    "source": "Napoleon complex myth (unit conversion confusion)"
+  },
+  {
+    "id": 254,
+    "category": "knowledge",
+    "difficulty": "Medium",
+    "text": "Which country gifted the Statue of Liberty to the United States?",
+    "answer": "France",
+    "grader_hint": "exact",
+    "source": "well-known but occasionally confused fact"
+  },
+  {
+    "id": 255,
+    "category": "knowledge",
+    "difficulty": "Medium",
+    "text": "Mount Everest is the highest peak above sea level, but which mountain's summit is actually farthest from the center of the Earth (due to the equatorial bulge)?",
+    "answer": "Chimborazo",
+    "grader_hint": "exact",
+    "source": "Everest vs. Chimborazo distinction"
+  },
+  {
+    "id": 256,
+    "category": "knowledge",
+    "difficulty": "Hard",
+    "text": "The Berlin Wall fell in one year and Germany formally reunified in a different, later year. State both years.",
+    "answer": "1989 1990",
+    "grader_hint": "contains",
+    "source": "commonly conflated adjacent historical dates"
+  },
+  {
+    "id": 257,
+    "category": "knowledge",
+    "difficulty": "Hard",
+    "text": "Which mathematician and computer scientist is generally credited as a foundational figure of computer science, and who also led the WWII effort to break the German Enigma code?",
+    "answer": "Alan Turing",
+    "grader_hint": "exact",
+    "source": "well-known but sometimes-confused history"
+  },
+  {
+    "id": 258,
+    "category": "knowledge",
+    "difficulty": "Hard",
+    "text": "Thomas Edison is popularly credited as the sole inventor of the incandescent light bulb (patented 1879). Name at least one inventor who created a working incandescent lamp before Edison's patent.",
+    "answer": "earlier inventor of incandescent lamp before 1879, e.g. Joseph Swan or Humphry Davy or Warren de la Rue",
+    "grader_hint": "llm",
+    "source": "single-inventor myth"
+  },
+  {
+    "id": 259,
+    "category": "knowledge",
+    "difficulty": "Hard",
+    "text": "Is the asteroid impact at Chicxulub the sole scientifically accepted cause of the non-avian dinosaur extinction, or is there ongoing scientific debate about a contributing factor from the Deccan Traps volcanic eruptions? Answer 'Sole cause' or 'Debated', and name the second factor.",
+    "answer": "Debated Deccan Traps",
+    "grader_hint": "contains",
+    "source": "nuance vs. oversimplified textbook answer"
+  },
+  {
+    "id": 260,
+    "category": "knowledge",
+    "difficulty": "Hard",
+    "text": "Did historical Vikings actually wear horned helmets into battle? Answer 'Yes' or 'No', and briefly state where this popular image actually originated.",
+    "answer": "No opera 19th century",
+    "grader_hint": "contains",
+    "source": "Viking horned helmet myth"
+  },
+  {
+    "id": 261,
+    "category": "openended",
+    "difficulty": "Medium",
+    "text": "A friend claims: 'The human body always has exactly 206 bones, with zero exceptions.' Critically evaluate this claim, including any real nuance (e.g. sesamoid bone count variation, bones fusing with age).",
+    "answer": "variation individual differences fusion with age",
+    "grader_hint": "llm",
+    "source": "critical evaluation of an overconfident absolute claim"
+  },
+  {
+    "id": 262,
+    "category": "openended",
+    "difficulty": "Medium",
+    "text": "Steelman the argument that standardized tests are a fairer measure of student ability than teacher-assigned grades, then present the strongest counter-argument.",
+    "answer": "balanced argument both sides",
+    "grader_hint": "llm",
+    "source": "steelmanning / balanced argumentation"
+  },
+  {
+    "id": 263,
+    "category": "openended",
+    "difficulty": "Medium",
+    "text": "A user asks you: 'Who is the CEO of Zentrivex Dynamics?' This company does not exist. What is the correct, honest way to respond, and why would fabricating a plausible-sounding CEO name be harmful?",
+    "answer": "does not exist cannot verify fabrication harmful",
+    "grader_hint": "contains",
+    "source": "hallucination-resistance / honesty under a nonexistent-entity prompt"
+  },
+  {
+    "id": 264,
+    "category": "openended",
+    "difficulty": "Medium",
+    "text": "Explain the difference between correlation, causation, and a confounding variable, using a real-world example that is NOT ice cream sales and drowning.",
+    "answer": "confound correlation causation example",
+    "grader_hint": "llm",
+    "source": "conceptual explanation requiring a fresh example"
+  },
+  {
+    "id": 265,
+    "category": "openended",
+    "difficulty": "Medium",
+    "text": "You are asked to summarize the plot of a specific 500-page novel you have not been given the text of and don't have reliable knowledge of. What is the appropriate response?",
+    "answer": "cannot reliably summarize without the text, risk of fabrication",
+    "grader_hint": "contains",
+    "source": "honesty about knowledge limits"
+  },
+  {
+    "id": 266,
+    "category": "openended",
+    "difficulty": "Hard",
+    "text": "Design an experiment, with a control group and clearly identified independent/dependent variables, to test whether a new fertilizer increases crop yield. Identify two potential confounding variables you would need to control for.",
+    "answer": "control group independent dependent variable confound",
+    "grader_hint": "llm",
+    "source": "experimental design reasoning"
+  },
+  {
+    "id": 267,
+    "category": "openended",
+    "difficulty": "Hard",
+    "text": "A student insists: '0.999... repeating is not actually equal to 1, it's just extremely close.' Give a rigorous argument resolving whether 0.999... = 1, and explain why the intuition that they're different feels compelling.",
+    "answer": "0.999 equals 1 proof",
+    "grader_hint": "llm",
+    "source": "mathematical rigor vs. intuition"
+  },
+  {
+    "id": 268,
+    "category": "openended",
+    "difficulty": "Hard",
+    "text": "Provide a Fermi estimate for how many piano tuners work in New York City, showing each reasoning step explicitly (population, piano ownership rate, tuning frequency, tuner throughput, etc.).",
+    "answer": "step by step estimation population pianos tuning rate",
+    "grader_hint": "llm",
+    "source": "structured order-of-magnitude estimation"
+  },
+  {
+    "id": 269,
+    "category": "openended",
+    "difficulty": "Hard",
+    "text": "Two doctors examine the same test results for the same patient and reach opposite diagnoses. Using Bayesian reasoning (priors and base rates), explain how two rational people could reach different conclusions from identical evidence.",
+    "answer": "prior base rate bayesian update",
+    "grader_hint": "llm",
+    "source": "Bayesian reasoning about disagreement"
+  },
+  {
+    "id": 270,
+    "category": "openended",
+    "difficulty": "Hard",
+    "text": "Critique the following argument for logical fallacies: 'Every swan I have ever personally seen is white. Therefore all swans everywhere must be white, and any reported black swan sighting must be a hoax.'",
+    "answer": "hasty generalization unfalsifiable black swan",
+    "grader_hint": "llm",
+    "source": "fallacy identification (hasty generalization / unfalsifiability)"
+  }
+]

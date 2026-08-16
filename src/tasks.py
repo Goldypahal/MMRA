@@ -239,41 +239,69 @@ OPENENDED_TASKS = [
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Master dataset
 # ─────────────────────────────────────────────────────────────────────────────
-ALL_TASKS: list[Task] = (
+# Master dataset & Extended Integration
+# ─────────────────────────────────────────────────────────────────────────────
+STANDARD_TASKS: list[Task] = (
     MATH_TASKS + LOGIC_TASKS + CODING_TASKS + SCIENCE_TASKS +
     LANGUAGE_TASKS + KNOWLEDGE_TASKS + OPENENDED_TASKS
 )
 
-assert len(ALL_TASKS) == 140, f"Expected 140 tasks, got {len(ALL_TASKS)}"
+ALL_TASKS: list[Task] = STANDARD_TASKS
+
+assert len(STANDARD_TASKS) == 140, f"Expected 140 standard tasks, got {len(STANDARD_TASKS)}"
+
+try:
+    from src.tasks_extended import EXTENDED_TASKS
+except ImportError:
+    EXTENDED_TASKS = []
+
+COMBINED_TASKS: list[Task] = STANDARD_TASKS + EXTENDED_TASKS
 
 
-def get_tasks_by_category(category: str) -> list[Task]:
-    return [t for t in ALL_TASKS if t.category == category]
-
-
-def get_tasks_by_difficulty(difficulty: str) -> list[Task]:
-    return [t for t in ALL_TASKS if t.difficulty == difficulty]
-
-
-def get_task_subset(n: int = 140) -> list[Task]:
+def get_dataset(name: str = "standard") -> list[Task]:
     """
-    Return n tasks sampled evenly across all 7 categories.
-    If n >= 140, returns ALL_TASKS.
+    Return dataset by name:
+    'standard' -> 140 standard tasks
+    'extended' -> 70 adversarial failure-mode tasks
+    'all' / 'combined' -> 210 combined tasks
     """
-    if n >= 140:
-        return ALL_TASKS
+    name_clean = (name or "standard").lower()
+    if name_clean in ("extended", "ext"):
+        return EXTENDED_TASKS
+    elif name_clean in ("all", "combined"):
+        return COMBINED_TASKS
+    else:
+        return STANDARD_TASKS
 
-    cats = list(dict.fromkeys(t.category for t in ALL_TASKS))
+
+def get_tasks_by_category(category: str, dataset: str = "standard") -> list[Task]:
+    tasks = get_dataset(dataset)
+    return [t for t in tasks if t.category == category]
+
+
+def get_tasks_by_difficulty(difficulty: str, dataset: str = "standard") -> list[Task]:
+    tasks = get_dataset(dataset)
+    return [t for t in tasks if t.difficulty == difficulty]
+
+
+def get_task_subset(n: int = 140, dataset: str = "standard") -> list[Task]:
+    """
+    Return n tasks sampled evenly across all 7 categories for the specified dataset.
+    """
+    tasks = get_dataset(dataset)
+    if n >= len(tasks):
+        return tasks
+
+    cats = list(dict.fromkeys(t.category for t in tasks))
     per_cat = max(1, n // len(cats))
     selected = []
     for cat_id in cats:
-        cat_tasks = get_tasks_by_category(cat_id)
+        cat_tasks = [t for t in tasks if t.category == cat_id]
         selected.extend(cat_tasks[:per_cat])
 
     if len(selected) < n:
-        remaining = [t for t in ALL_TASKS if t not in selected]
+        remaining = [t for t in tasks if t not in selected]
         selected.extend(remaining[:n - len(selected)])
 
     return selected[:n]
