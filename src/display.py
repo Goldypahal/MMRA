@@ -216,6 +216,51 @@ def print_stats_table(tests: list[PairedTTest]) -> None:
     console.print(f"[dim]  Bonferroni α = 0.05 / {len(tests)} = {0.05/len(tests):.4f} per test[/]")
 
 
+def print_condition_pair_table(pair_tests) -> None:
+    if not pair_tests:
+        return
+
+    table = Table(
+        title="[bold white]Core Condition Comparisons (Paper Hypotheses)[/]",
+        box=box.SIMPLE_HEAD,
+        border_style="dim",
+        show_lines=True,
+    )
+    table.add_column("Comparison",      style="bold white", min_width=12)
+    table.add_column("Research Hypothesis / Isolation", style="dim white", min_width=32)
+    table.add_column("Cond A",          justify="right",   min_width=8)
+    table.add_column("Cond B",          justify="right",   min_width=8)
+    table.add_column("Gain",            justify="right",   min_width=8, style="bold green")
+    table.add_column("t-stat",          justify="right",   min_width=8)
+    table.add_column("p (Bonf.)",       justify="right",   min_width=10)
+    table.add_column("Cohen's d",       justify="right",   min_width=10)
+    table.add_column("Effect",          justify="center",  min_width=10)
+    table.add_column("Sig.",            justify="center",  min_width=6)
+
+    for p in pair_tests:
+        from src.analysis import effect_size_label
+        eff = effect_size_label(p.cohens_d)
+        eff_color = {"Large": "green", "Medium": "yellow", "Small": "cyan", "Negligible": "dim"}.get(eff, "white")
+        sig_str = "[bold green]***[/]" if p.p_bonferroni < 0.001 else \
+                  "[green]**[/]"  if p.p_bonferroni < 0.01  else \
+                  "[yellow]*[/]"  if p.p_bonferroni < 0.05  else \
+                  "[dim]ns[/]"
+        delta = f"+{p.gain*100:.1f}%" if p.gain >= 0 else f"{p.gain*100:.1f}%"
+        table.add_row(
+            p.comparison,
+            p.description,
+            f"{p.mean_a*100:.1f}%",
+            f"{p.mean_b*100:.1f}%",
+            delta,
+            f"{p.t_stat:.3f}",
+            f"{p.p_bonferroni:.4f}",
+            f"{p.cohens_d:.3f}",
+            f"[{eff_color}]{eff}[/]",
+            sig_str,
+        )
+    console.print(table)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Token efficiency table
 # ─────────────────────────────────────────────────────────────────────────────

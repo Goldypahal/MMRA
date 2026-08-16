@@ -33,6 +33,23 @@ class PairedTTest:
 
 
 @dataclass
+class ConditionPairComparison:
+    comparison: str
+    cond_a: str
+    cond_b: str
+    description: str
+    mean_a: float
+    mean_b: float
+    gain: float
+    t_stat: float
+    p_value: float
+    p_bonferroni: float
+    cohens_d: float
+    significant: bool
+    n: int
+
+
+@dataclass
 class TokenEfficiency:
     condition: str
     avg_accuracy: float
@@ -111,6 +128,59 @@ def paired_ttests(df: pd.DataFrame, cond_a: str = "C1", cond_b: str = "C4") -> l
         ))
 
     return sorted(results, key=lambda x: x.improvement, reverse=True)
+
+
+def all_condition_pair_tests(df: pd.DataFrame) -> list[ConditionPairComparison]:
+    """
+    Computes paired t-tests across all 5 key condition pair comparisons:
+    1. C1 vs C2: Single model vs Self-consistency (does voting within 1 model help?)
+    2. C1 vs C3: Single model vs Parallel vote (does cross-model diversity help more?)
+    3. C1 vs C4: Single model vs Multi-agent debate (full debate gain)
+    4. C2 vs C3: Self-consistency vs Parallel vote (same-model vs cross-model voting)
+    5. C3 vs C4: Parallel vote vs Multi-agent debate (voting vs inter-agent revision)
+    """
+    pairs = [
+        ("C1", "C2", "Single model vs Self-consistency (Same-model sampling)"),
+        ("C1", "C3", "Single model vs Parallel vote (Cross-model diversity)"),
+        ("C1", "C4", "Single model vs Multi-agent debate (Full debate gain)"),
+        ("C2", "C3", "Self-consistency vs Parallel vote (Sampling vs Diversity)"),
+        ("C3", "C4", "Parallel vote vs Multi-agent debate (Voting vs Debate)"),
+    ]
+    results = []
+    n_tests = len(pairs)
+
+    for cond_a, cond_b, desc in pairs:
+        sub_a = df[df["condition"] == cond_a].set_index("task_id")["score"]
+        sub_b = df[df["condition"] == cond_b].set_index("task_id")["score"]
+        common = sub_a.index.intersection(sub_b.index)
+        if len(common) < 3:
+            continue
+
+        a_vals = sub_a.loc[common].values
+        b_vals = sub_b.loc[common].values
+        diff = b_vals - a_vals
+
+        t_stat, p_val = stats.ttest_rel(b_vals, a_vals)
+        p_bonf = min(p_val * n_tests, 1.0)
+        sd_diff = np.std(diff, ddof=1)
+        cohens_d = np.mean(diff) / sd_diff if sd_diff > 0 else 0.0
+
+        results.append(ConditionPairComparison(
+            comparison=f"{cond_a} vs {cond_b}",
+            cond_a=cond_a,
+            cond_b=cond_b,
+            description=desc,
+            mean_a=float(np.mean(a_vals)),
+            mean_b=float(np.mean(b_vals)),
+            gain=float(np.mean(diff)),
+            t_stat=float(t_stat),
+            p_value=float(p_val),
+            p_bonferroni=float(p_bonf),
+            cohens_d=float(cohens_d),
+            significant=p_bonf < 0.05,
+            n=len(common),
+        ))
+    return results
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -18,14 +18,14 @@ from rich.panel import Panel
 
 from src.database import load_results, export_to_json, summary_stats
 from src.analysis import (
-    accuracy_table, paired_ttests, complexity_interaction,
+    accuracy_table, paired_ttests, all_condition_pair_tests, complexity_interaction,
     token_efficiency, model_contribution, failure_mode_breakdown,
     effect_size_label,
 )
 from src.display import (
     print_banner, print_section, print_accuracy_table, print_stats_table,
-    print_token_efficiency, print_complexity_table, print_model_contribution,
-    print_failure_mode_table, print_experiment_status,
+    print_condition_pair_table, print_token_efficiency, print_complexity_table,
+    print_model_contribution, print_failure_mode_table, print_experiment_status,
 )
 
 if sys.platform == "win32":
@@ -80,8 +80,13 @@ def main():
     if args.brief:
         return
 
-    # ── 2. Statistical Tests ──────────────────────────────────────────────
-    print_section("Table 2 — Paired t-tests: C1 vs C4 (Bonferroni)")
+    # ── 2. Core Condition Comparisons (The 5 Key Paper Hypotheses) ───────
+    print_section("Core Paper Comparisons — Condition Pairs (Bonferroni Corrected)")
+    pair_tests = all_condition_pair_tests(df)
+    print_condition_pair_table(pair_tests)
+
+    # ── 3. Category Statistical Tests (C1 vs C4) ─────────────────────────
+    print_section("Table 2 — Paired t-tests per Category: C1 vs C4 (Bonferroni)")
     tests = paired_ttests(df)
     print_stats_table(tests)
 
