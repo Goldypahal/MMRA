@@ -13,12 +13,9 @@ __pycache__/
 *$py.class
 .pytest_cache/
 
-# Experiment outputs & DBs
-results/*.db
+# SQLite WAL temporary journal files (database and exported json/csv ARE tracked)
 results/*.db-shm
 results/*.db-wal
-results/*.json
-results/*.csv
 
 # Temporary text exports
 doc_content*.txt

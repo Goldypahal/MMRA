@@ -25,7 +25,7 @@ from rich.panel import Panel
 from src.config import CONDITIONS, CATEGORIES, MODELS
 from src.tasks import ALL_TASKS, get_tasks_by_category, get_task_subset, get_dataset
 from src.conditions import run_condition, TaskResult
-from src.database import init_db, save_result, get_completed_combos, summary_stats, clear_db
+from src.database import init_db, save_result, save_results_batch, get_completed_combos, summary_stats, clear_db
 from src.display import (
     print_banner, print_section, print_task_result,
     make_progress, print_experiment_status,
@@ -107,6 +107,7 @@ async def run_tasks(
                 task_obj = next((t for t in tasks if t.id == result.task_id), None)
                 print_task_result(result, task_obj.text if task_obj else "")
 
+    save_results_batch(results)
     console.print(f"\n[green]✓ Done.[/] {len(results)} results saved. "
                   f"{'[red]' + str(failed) + ' failed.[/]' if failed else ''}")
     return results

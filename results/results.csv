@@ -1,0 +1,56 @@
+id,task_id,category,difficulty,condition,final_answer,score,grader_method,grader_detail,tokens_total,latency_ms,model_responses,model_scores,model_tokens,round1_responses,round2_responses,error,created_at,failure_mode
+78,1,math,Easy,C1,,0.0,error,"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",0,942480.9701000049,{},{},{},{},{},"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",2026-08-16 12:14:34,None
+148,1,math,Easy,C2,,0.0,error,all calls failed,0,5198366.502699995,{},{},{},{},{},,2026-08-16 13:30:48,None
+88,1,math,Easy,C3,,0.0,error,all models failed,0,955752.8792000085,{},{},{},{},{},,2026-08-16 12:16:21,None
+141,1,math,Easy,C4,,0.0,exact,empty response,0,156437.7,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:30:03,Incomplete
+137,2,math,Easy,C1,,0.0,error,Connection error.,0,156032.34760000487,{},{},{},{},{},Connection error.,2026-08-16 13:30:02,None
+147,2,math,Easy,C2,,0.0,error,all calls failed,0,13243.405599991092,{},{},{},{},{},,2026-08-16 13:30:15,None
+64,2,math,Easy,C3,,0.0,error,all models failed,0,944185.056199989,{},{},{},{},{},,2026-08-16 12:01:55,None
+58,2,math,Easy,C4,,0.0,exact,empty response,0,948325.9,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 12:00:24,Incomplete
+44,3,math,Easy,C3,0,0.0,exact,'0' vs '5',1928,951114.9,"{'A': 'Final answer: 0', 'C': 'The units digits of the powers are:\n\n- \\(7^{2025}\\) → cycle of 4, \\(2025 \\equiv 1 \\pmod{4}\\) → units digit \\(7\\).\n- \\(8^{2026}\\) → cycle of 4, \\(2026 \\equiv 2 \\pmod{4}\\) → units digit \\(4\\).\n- \\(9^{2027}\\) → cycle of 2, odd exponent → units digit \\(9\\).\n\nSumming these units digits: \\(7 + 4 + 9 = 20\\).\n\nThe units digit of the total sum is the units digit of \\(20\\), which is \\(0\\).\n\n**Final answer: 0**', 'D': 'The units digit of \\(7^{2025}\\) is 7 (since 2025 mod 4 = 1, and the cycle of 7 is 7, 9, 3, 1).  \nThe units digit of \\(8^{2026}\\) is 4 (since 2026 mod 4 = 2, and the cycle of 8 is 8, 4, 2, 6).  \nThe units digit of \\(9^{2027}\\) is 9 (since 2027 is odd, and the cycle of 9 is 9, 1).  \n\nAdding these units digits: \\(7 + 4 + 9 = 20\\), so the units digit of the sum is 0.\n\nFinal answer: <0>'}","{'A': 0.0, 'C': 0.0, 'D': 0.0}","{'A': 460, 'C': 731, 'D': 737}",{},{},,2026-08-16 11:48:22,Incomplete
+72,4,math,Easy,C1,,0.0,error,"Error code: 429 - {'error': {'message': 'Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day', 'code': 429, 'metadata': {'headers': {'X-RateLimit-Limit': '50', 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '1786924800000'}, 'limit_source': 'openrouter_free_tier_daily', 'remedy_hint': 'Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.', 'provider_name': None}}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",0,942735.8162000019,{},{},{},{},{},"Error code: 429 - {'error': {'message': 'Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day', 'code': 429, 'metadata': {'headers': {'X-RateLimit-Limit': '50', 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '1786924800000'}, 'limit_source': 'openrouter_free_tier_daily', 'remedy_hint': 'Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.', 'provider_name': None}}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",2026-08-16 12:13:38,None
+149,5,math,Easy,C4,,0.0,numeric,empty response,0,5176869.1,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:30:48,Incomplete
+115,21,logic,Easy,C1,,0.0,error,Connection error.,0,1300.7643000164535,{},{},{},{},{},Connection error.,2026-08-16 13:27:29,None
+123,21,logic,Easy,C2,,0.0,error,all calls failed,0,1609.8100999952294,{},{},{},{},{},,2026-08-16 13:27:30,None
+143,21,logic,Easy,C3,,0.0,error,all models failed,0,1627.4096999841277,{},{},{},{},{},,2026-08-16 13:30:03,None
+133,21,logic,Easy,C4,,0.0,exact,empty response,0,155480.2,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:30:02,Incomplete
+105,22,logic,Easy,C3,,0.0,error,all models failed,0,4266522.626199992,{},{},{},{},{},,2026-08-16 13:27:28,None
+95,22,logic,Easy,C4,,0.0,exact,empty response,0,243380.0,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 12:16:22,Incomplete
+127,41,coding,Easy,C1,,0.0,error,Connection error.,0,1206.8694999907166,{},{},{},{},{},Connection error.,2026-08-16 13:27:31,None
+125,41,coding,Easy,C2,,0.0,error,all calls failed,0,1363.045800011605,{},{},{},{},{},,2026-08-16 13:27:30,None
+155,41,coding,Easy,C4,,0.0,exact,empty response,0,5358551.8,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:31:09,Incomplete
+86,42,coding,Easy,C1,,0.0,error,"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",0,954877.8542000218,{},{},{},{},{},"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",2026-08-16 12:16:21,None
+138,42,coding,Easy,C2,,0.0,error,all calls failed,0,156278.37949999957,{},{},{},{},{},,2026-08-16 13:30:03,None
+124,42,coding,Easy,C3,,0.0,error,all models failed,0,1560.2599999983795,{},{},{},{},{},,2026-08-16 13:27:30,None
+49,42,coding,Easy,C4,,0.0,contains,empty response,0,944347.2,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 11:58:28,Incomplete
+119,61,science,Easy,C1,,0.0,error,Connection error.,0,1271.4710000145715,{},{},{},{},{},Connection error.,2026-08-16 13:27:30,None
+146,61,science,Easy,C2,,0.0,error,all calls failed,0,13009.145199990598,{},{},{},{},{},,2026-08-16 13:30:15,None
+57,61,science,Easy,C3,,0.0,error,all models failed,0,945638.9196999953,{},{},{},{},{},,2026-08-16 12:00:21,None
+118,61,science,Easy,C4,,0.0,contains,empty response,0,1720.9,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:27:30,Incomplete
+122,62,science,Easy,C1,,0.0,error,Connection error.,0,1355.405200010864,{},{},{},{},{},Connection error.,2026-08-16 13:27:30,None
+144,62,science,Easy,C2,,0.0,error,all calls failed,0,1592.9252000059932,{},{},{},{},{},,2026-08-16 13:30:03,None
+109,62,science,Easy,C3,,0.0,error,all models failed,0,4264356.755099987,{},{},{},{},{},,2026-08-16 13:27:28,None
+145,62,science,Easy,C4,,0.0,contains,empty response,0,1696.2,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:30:04,Incomplete
+87,81,language,Easy,C1,,0.0,error,"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",0,55325.48309999402,{},{},{},{},{},"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",2026-08-16 12:16:21,None
+107,81,language,Easy,C2,,0.0,error,all calls failed,0,4484669.075300015,{},{},{},{},{},,2026-08-16 13:27:28,None
+131,81,language,Easy,C3,,0.0,error,all models failed,0,155706.09770002193,{},{},{},{},{},,2026-08-16 13:30:02,None
+96,81,language,Easy,C4,,0.0,contains,empty response,0,128894.8,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 12:16:22,Incomplete
+130,82,language,Easy,C1,,0.0,error,Connection error.,0,153862.74640000192,{},{},{},{},{},Connection error.,2026-08-16 13:30:02,None
+154,82,language,Easy,C2,,0.0,error,all calls failed,0,5358184.688600013,{},{},{},{},{},,2026-08-16 13:31:09,None
+91,82,language,Easy,C3,,0.0,error,all models failed,0,957321.2846000097,{},{},{},{},{},,2026-08-16 12:16:21,None
+135,82,language,Easy,C4,,0.0,contains,empty response,0,155418.1,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:30:02,Incomplete
+136,101,knowledge,Easy,C1,,0.0,error,Connection error.,0,153821.45810002112,{},{},{},{},{},Connection error.,2026-08-16 13:30:02,None
+108,101,knowledge,Easy,C2,,0.0,error,all calls failed,0,4266626.83590001,{},{},{},{},{},,2026-08-16 13:27:28,None
+126,101,knowledge,Easy,C3,,0.0,error,all models failed,0,1496.0415000095963,{},{},{},{},{},,2026-08-16 13:27:30,None
+63,102,knowledge,Easy,C1,,0.0,error,"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",0,944439.6284999966,{},{},{},{},{},"Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",2026-08-16 12:01:54,None
+59,102,knowledge,Easy,C2,,0.0,error,all calls failed,0,949788.052399992,{},{},{},{},{},,2026-08-16 12:00:25,None
+120,102,knowledge,Easy,C3,,0.0,error,all models failed,0,1845.9684000117704,{},{},{},{},{},,2026-08-16 13:27:30,None
+106,102,knowledge,Easy,C4,,0.0,exact,empty response,0,4264313.4,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:27:28,Incomplete
+142,121,openended,Hard,C1,,0.0,error,Connection error.,0,1487.5611000170466,{},{},{},{},{},Connection error.,2026-08-16 13:30:03,None
+94,121,openended,Hard,C2,,0.0,error,all calls failed,0,124859.71770001925,{},{},{},{},{},,2026-08-16 12:16:22,None
+132,121,openended,Hard,C3,,0.0,error,all models failed,0,155347.08579999278,{},{},{},{},{},,2026-08-16 13:30:02,None
+153,121,openended,Hard,C4,,0.0,llm,empty response,0,5354097.5,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 13:31:09,Incomplete
+98,122,openended,Hard,C1,,0.0,error,Connection error.,0,4264417.707500019,{},{},{},{},{},Connection error.,2026-08-16 13:27:28,None
+134,122,openended,Hard,C2,,0.0,error,all calls failed,0,4557.888699986506,{},{},{},{},{},,2026-08-16 13:30:02,None
+139,122,openended,Hard,C3,,0.0,error,all models failed,0,156127.19080000534,{},{},{},{},{},,2026-08-16 13:30:03,None
+77,122,openended,Hard,C4,,0.0,llm,empty response,0,944686.0,{},{},"{'A': 0, 'B': 0, 'C': 0, 'D': 0}",{},{},,2026-08-16 12:14:14,Incomplete
