@@ -20,7 +20,7 @@ from rich.panel import Panel
 from rich.rule import Rule
 
 from src.config import MODELS
-from src.tasks import ALL_TASKS, get_tasks_by_category
+from src.tasks import COMBINED_TASKS, ALL_TASKS, get_tasks_by_category, get_dataset
 from src.client import call_model, call_all_models
 from src.graders import extract_final_answer, score_response
 from src.display import print_banner, MODEL_STYLES
@@ -34,7 +34,7 @@ DEBATE_SYSTEM = (
 
 
 async def watch_debate(task_id: int):
-    task = next((t for t in ALL_TASKS if t.id == task_id), None)
+    task = next((t for t in COMBINED_TASKS if t.id == task_id), None)
     if not task:
         console.print(f"[red]Task {task_id} not found.[/]")
         return
