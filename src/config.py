@@ -27,10 +27,10 @@ class ModelConfig:
 
 
 MODELS: Dict[str, ModelConfig] = {
-    "A": ModelConfig("A", "DeepSeek-R1",  "DeepSeek", "deepseek/deepseek-r1:free",  "bold blue",   fallback_api_keys=["nvidia/nemotron-3-super-120b-a12b:free"]),
-    "B": ModelConfig("B", "Gemma-4-31B",  "Gemma",    "google/gemma-4-31b-it:free", "bold green",  fallback_api_keys=["google/gemma-4-26b-a4b-it:free"]),
-    "C": ModelConfig("C", "Qwen-3-30B",   "Qwen",     "qwen/qwen3-30b-a3b:free",    "bold yellow", fallback_api_keys=["cohere/north-mini-code:free"]),
-    "D": ModelConfig("D", "Llama-4-Scout", "Llama",    "meta-llama/llama-4-scout:free","bold red",    fallback_api_keys=["nvidia/nemotron-3.5-lightning:free"]),
+    "A": ModelConfig("A", "Nemotron-3-Ultra", "Nemotron", "nvidia/nemotron-3-ultra-550b-a55b:free", "bold blue",   fallback_api_keys=["nvidia/nemotron-3-super-120b-a12b:free"]),
+    "B": ModelConfig("B", "Gemma-4-31B",       "Gemma",    "google/gemma-4-31b-it:free",         "bold green",  fallback_api_keys=["google/gemma-4-26b-a4b-it:free"]),
+    "C": ModelConfig("C", "GLM-4.5-Air",       "GLM",      "z-ai/glm-4.5-air:free",              "bold yellow", fallback_api_keys=["cohere/north-mini-code:free"]),
+    "D": ModelConfig("D", "GPT-OSS-20B",       "GPT-OSS",  "openai/gpt-oss-20b:free",             "bold red",    fallback_api_keys=["nvidia/nemotron-3.5-lightning:free"]),
 }
 
 C1_C2_MODEL: str = "A"
