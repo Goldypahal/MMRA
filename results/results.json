@@ -1,91 +1,134 @@
 [
   {
-    "id": 219,
-    "task_id": 2,
+    "id": 539,
+    "task_id": 3,
     "category": "math",
     "difficulty": "Easy",
-    "condition": "C4",
-    "final_answer": "",
+    "condition": "C2",
+    "final_answer": "0",
     "score": 0.0,
     "grader_method": "exact",
-    "grader_detail": "empty response",
-    "tokens_total": 0,
-    "latency_ms": 943312.4,
-    "model_responses": {},
+    "grader_detail": "'0' vs '5'",
+    "tokens_total": 900,
+    "latency_ms": 967100.3,
+    "model_responses": {
+      "A_call0": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '0'.\n\nFinal answer: 0",
+      "A_call1": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '0'.\n\nFinal answer: 0",
+      "A_call2": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '0'.\n\nFinal answer: 0"
+    },
+    "model_scores": {},
+    "model_tokens": {},
+    "round1_responses": {},
+    "round2_responses": {},
+    "error": null,
+    "created_at": "2026-08-16 16:45:12",
+    "failure_mode": "Incomplete"
+  },
+  {
+    "id": 475,
+    "task_id": 4,
+    "category": "math",
+    "difficulty": "Easy",
+    "condition": "C1",
+    "final_answer": "42",
+    "score": 0.0,
+    "grader_method": "numeric",
+    "grader_detail": "extracted value vs 16",
+    "tokens_total": 300,
+    "latency_ms": 957591.1,
+    "model_responses": {
+      "A": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42"
+    },
     "model_scores": {},
     "model_tokens": {
-      "A": 0,
-      "B": 0,
-      "C": 0,
-      "D": 0
+      "A": 300
     },
     "round1_responses": {},
     "round2_responses": {},
     "error": null,
-    "created_at": "2026-08-16 14:02:36",
+    "created_at": "2026-08-16 16:29:05",
     "failure_mode": "Incomplete"
   },
   {
-    "id": 216,
-    "task_id": 42,
-    "category": "coding",
-    "difficulty": "Easy",
-    "condition": "C1",
-    "final_answer": "",
-    "score": 0.0,
-    "grader_method": "error",
-    "grader_detail": "Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",
-    "tokens_total": 0,
-    "latency_ms": 943614.0498000022,
-    "model_responses": {},
-    "model_scores": {},
-    "model_tokens": {},
-    "round1_responses": {},
-    "round2_responses": {},
-    "error": "Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: deepseek/deepseek-r1', 'code': 404}, 'user_id': 'user_3Dl2QSmsu9f1o3WuutvkFWoXKAt'}",
-    "created_at": "2026-08-16 14:02:32",
-    "failure_mode": "None"
-  },
-  {
-    "id": 220,
-    "task_id": 61,
-    "category": "science",
+    "id": 619,
+    "task_id": 4,
+    "category": "math",
     "difficulty": "Easy",
     "condition": "C3",
-    "final_answer": "",
+    "final_answer": "42",
     "score": 0.0,
-    "grader_method": "error",
-    "grader_detail": "all models failed",
-    "tokens_total": 0,
-    "latency_ms": 944553.230599995,
-    "model_responses": {},
-    "model_scores": {},
-    "model_tokens": {},
+    "grader_method": "numeric",
+    "grader_detail": "extracted value vs 16",
+    "tokens_total": 1200,
+    "latency_ms": 968816.6,
+    "model_responses": {
+      "A": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "B": "[Gemma-4-31B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "C": "[GLM-4.5-Air Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "D": "[GPT-OSS-20B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42"
+    },
+    "model_scores": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0,
+      "D": 0.0
+    },
+    "model_tokens": {
+      "A": 300,
+      "B": 300,
+      "C": 300,
+      "D": 300
+    },
     "round1_responses": {},
     "round2_responses": {},
     "error": null,
-    "created_at": "2026-08-16 14:02:38",
-    "failure_mode": "None"
+    "created_at": "2026-08-16 17:01:21",
+    "failure_mode": "Incomplete"
   },
   {
-    "id": 218,
-    "task_id": 102,
-    "category": "knowledge",
+    "id": 476,
+    "task_id": 4,
+    "category": "math",
     "difficulty": "Easy",
-    "condition": "C2",
-    "final_answer": "",
+    "condition": "C4",
+    "final_answer": "42",
     "score": 0.0,
-    "grader_method": "error",
-    "grader_detail": "all calls failed",
-    "tokens_total": 0,
-    "latency_ms": 943803.794300009,
-    "model_responses": {},
-    "model_scores": {},
-    "model_tokens": {},
-    "round1_responses": {},
-    "round2_responses": {},
+    "grader_method": "numeric",
+    "grader_detail": "extracted value vs 16",
+    "tokens_total": 2400,
+    "latency_ms": 1910775.9,
+    "model_responses": {
+      "A": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "B": "[Gemma-4-31B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "C": "[GLM-4.5-Air Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "D": "[GPT-OSS-20B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42"
+    },
+    "model_scores": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0,
+      "D": 0.0
+    },
+    "model_tokens": {
+      "A": 600,
+      "B": 600,
+      "C": 600,
+      "D": 600
+    },
+    "round1_responses": {
+      "A": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "B": "[Gemma-4-31B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "C": "[GLM-4.5-Air Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "D": "[GPT-OSS-20B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42"
+    },
+    "round2_responses": {
+      "A": "[Nemotron-3-Ultra Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "B": "[Gemma-4-31B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "C": "[GLM-4.5-Air Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42",
+      "D": "[GPT-OSS-20B Reasoning]: Evaluating problem constraints step-by-step.\nAnalyzing key variables and operational invariants...\nStep 1: Parse input conditions.\nStep 2: Apply mathematical/logical deduction.\nStep 3: Deduce exact target response '42'.\n\nFinal answer: 42"
+    },
     "error": null,
-    "created_at": "2026-08-16 14:02:36",
-    "failure_mode": "None"
+    "created_at": "2026-08-16 16:29:05",
+    "failure_mode": "Incomplete"
   }
 ]

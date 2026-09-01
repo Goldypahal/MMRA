@@ -159,7 +159,11 @@ def get_completed_combos() -> set[tuple]:
     if not Path(RESULTS_DB).exists():
         return set()
     conn = sqlite3.connect(RESULTS_DB)
-    rows = conn.execute("SELECT task_id, condition FROM results").fetchall()
+    rows = conn.execute("""
+        SELECT task_id, condition FROM results
+        WHERE tokens_total > 0
+          AND (error IS NULL OR error = '')
+    """).fetchall()
     conn.close()
     return set(rows)
 
@@ -178,7 +182,7 @@ def export_to_json() -> None:
     records = df.to_dict(orient="records")
     with open(RESULTS_JSON, "w") as f:
         json.dump(records, f, indent=2, default=str)
-    print(f"Exported {len(records)} records → {RESULTS_JSON}")
+    print(f"Exported {len(records)} records -> {RESULTS_JSON}")
 
 
 def summary_stats() -> dict:

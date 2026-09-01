@@ -13,8 +13,8 @@ from typing import Optional
 from openai import AsyncOpenAI, RateLimitError, APIStatusError
 
 from src.config import (
-    OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODELS,
-    TEMPERATURE, MAX_TOKENS, REQUEST_TIMEOUT
+    OPENROUTER_API_KEY, OPENROUTER_BASE_URL, OPENAI_API_KEY, GLM_API_KEY, GEMINI_API_KEY, COHERE_API_KEY,
+    MODELS, ModelConfig, TEMPERATURE, MAX_TOKENS, REQUEST_TIMEOUT
 )
 
 # Max retry attempts for 429 rate-limit errors
@@ -36,22 +36,42 @@ class APIResponse:
     error: Optional[str] = None
 
 
-def is_mock_mode() -> bool:
+def is_mock_mode(model_cfg: Optional[ModelConfig] = None) -> bool:
     """Return True if offline mock simulation mode is active (no API key required)."""
     env_mock = os.getenv("MMRA_MOCK_MODE", "0").lower()
     if env_mock in ("1", "true", "yes"):
         return True
-    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY in ("your_openrouter_key_here", "", "mock"):
-        return True
-    return False
+    if model_cfg:
+        key = model_cfg.provider_api_key or OPENROUTER_API_KEY
+        if not key or key in ("your_openrouter_key_here", "your_openai_key_here", "your_glm_key_here", "your_gemini_key_here", "", "mock"):
+            return True
+        return False
+    has_any_key = any(
+        k and not k.startswith("your_")
+        for k in (OPENROUTER_API_KEY, OPENAI_API_KEY, GLM_API_KEY, GEMINI_API_KEY)
+    )
+    return not has_any_key
 
 
-def _make_client() -> AsyncOpenAI:
-    return AsyncOpenAI(
-        api_key=OPENROUTER_API_KEY or "mock_key",
-        base_url=OPENROUTER_BASE_URL,
+def _make_client_for_model(model_cfg: ModelConfig, override_model_name: Optional[str] = None) -> tuple[AsyncOpenAI, str]:
+    """
+    Creates an AsyncOpenAI client targeting the model's direct provider base_url and API key.
+    Returns (AsyncOpenAI_client, model_name_string).
+    """
+    model_name = override_model_name or model_cfg.api_key
+    base_url = model_cfg.base_url or OPENROUTER_BASE_URL
+    api_key = model_cfg.provider_api_key or OPENROUTER_API_KEY or "mock_key"
+
+    if "/" in model_name and not model_cfg.base_url:
+        base_url = OPENROUTER_BASE_URL
+        api_key = OPENROUTER_API_KEY or api_key
+
+    client = AsyncOpenAI(
+        api_key=api_key,
+        base_url=base_url,
         timeout=REQUEST_TIMEOUT,
     )
+    return client, model_name
 
 
 async def _mock_call_model(
@@ -123,23 +143,22 @@ async def call_model(
 ) -> APIResponse:
     """
     Single async call to one model. Returns structured APIResponse.
-    Supports 100% offline execution when no API key is set.
+    Supports native direct provider API calls and 100% offline execution.
     """
-    if is_mock_mode():
+    model_cfg = MODELS[model_id]
+    if is_mock_mode(model_cfg):
         return await _mock_call_model(model_id, prompt, system_prompt)
 
-    model_cfg = MODELS[model_id]
-    api_key_to_use = override_api_key or model_cfg.api_key
+    client, model_name = _make_client_for_model(model_cfg, override_model_name=override_api_key)
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
 
     try:
-        client = _make_client()
         t0 = time.perf_counter()
         resp = await client.chat.completions.create(
-            model=api_key_to_use,
+            model=model_name,
             messages=messages,
             max_tokens=MAX_TOKENS,
             temperature=temperature,
@@ -167,10 +186,19 @@ async def call_model(
             print(f"  [Notice] API key unauthorized. Falling back to offline mock model for {model_cfg.name}.")
             return await _mock_call_model(model_id, prompt, system_prompt)
 
-        # Check for 404 / 400 model unavailable — try fallback models if available
-        is_unavailable = "404" in err_str or "unavailable" in err_str.lower() or "not found" in err_str.lower()
+        # Check for 404 / 400 / credit limit / model unavailable — try fallback models if available
+        is_unavailable = (
+            "404" in err_str
+            or "400" in err_str
+            or "402" in err_str
+            or "unavailable" in err_str.lower()
+            or "not found" in err_str.lower()
+            or "no endpoint" in err_str.lower()
+            or "credit" in err_str.lower()
+        )
         if is_unavailable and not override_api_key and getattr(model_cfg, "fallback_api_keys", None):
             for fallback_key in model_cfg.fallback_api_keys:
+                print(f"  [Fallback] {model_cfg.name} primary key ({model_name}) unavailable. Trying fallback: {fallback_key}...")
                 fallback_resp = await call_model(
                     model_id, prompt, temperature, system_prompt,
                     _retry_count=_retry_count, override_api_key=fallback_key

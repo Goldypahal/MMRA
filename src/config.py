@@ -17,6 +17,15 @@ OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 GLM_API_KEY: str = os.getenv("GLM_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
+
+PROVIDER_BASE_URLS = {
+    "openai": "https://api.openai.com/v1",
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "glm": "https://open.bigmodel.cn/api/paas/v4/",
+    "cohere": "https://api.cohere.com/v2",
+    "openrouter": OPENROUTER_BASE_URL,
+}
 
 # ── Model Registry ────────────────────────────────────────────────────────────
 @dataclass
@@ -24,17 +33,59 @@ class ModelConfig:
     id: str
     name: str
     short: str
-    api_key: str          # primary model identifier on OpenRouter
+    api_key: str          # model name/identifier for completion request payload
     color: str            # rich markup color
     fallback_api_keys: list[str] = field(default_factory=list)
-    provider_api_key: str = ""  # dedicated provider API key if supplied
+    provider_api_key: str = ""  # dedicated provider API key
+    provider: str = "openrouter" # "openai", "gemini", "glm", "cohere", "openrouter"
+    base_url: str = ""     # optional custom base URL
 
 
 MODELS: Dict[str, ModelConfig] = {
-    "A": ModelConfig("A", "Nemotron-3-Ultra", "Nemotron", "nvidia/nemotron-3-ultra-550b-a55b:free", "bold blue",   fallback_api_keys=["nvidia/nemotron-3-super-120b-a12b:free"]),
-    "B": ModelConfig("B", "Gemma-4-31B",       "Gemma",    "google/gemma-4-31b-it:free",         "bold green",  fallback_api_keys=["google/gemma-4-26b-a4b-it:free"], provider_api_key=GEMINI_API_KEY),
-    "C": ModelConfig("C", "GLM-4.5-Air",       "GLM",      "z-ai/glm-4.5-air:free",              "bold yellow", fallback_api_keys=["cohere/north-mini-code:free"], provider_api_key=GLM_API_KEY),
-    "D": ModelConfig("D", "GPT-OSS-20B",       "GPT-OSS",  "openai/gpt-oss-20b:free",             "bold red",    fallback_api_keys=["nvidia/nemotron-3.5-lightning:free"], provider_api_key=OPENAI_API_KEY),
+    "A": ModelConfig(
+        id="A",
+        name="Nemotron-3-Ultra",
+        short="Nemotron",
+        api_key="nvidia/nemotron-3-ultra-550b-a55b:free",
+        color="bold blue",
+        fallback_api_keys=["nvidia/nemotron-3-super-120b-a12b:free"],
+        provider="openrouter",
+        provider_api_key=OPENROUTER_API_KEY,
+        base_url=PROVIDER_BASE_URLS["openrouter"],
+    ),
+    "B": ModelConfig(
+        id="B",
+        name="Gemma-4-31B",
+        short="Gemma",
+        api_key="gemini-1.5-flash",
+        color="bold green",
+        fallback_api_keys=["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free"],
+        provider="gemini",
+        provider_api_key=GEMINI_API_KEY,
+        base_url=PROVIDER_BASE_URLS["gemini"],
+    ),
+    "C": ModelConfig(
+        id="C",
+        name="Cohere-North-Mini",
+        short="Cohere",
+        api_key="command-r-plus",
+        color="bold yellow",
+        fallback_api_keys=["cohere/north-mini-code:free", "command-r"],
+        provider="cohere",
+        provider_api_key=COHERE_API_KEY,
+        base_url=PROVIDER_BASE_URLS["cohere"],
+    ),
+    "D": ModelConfig(
+        id="D",
+        name="GPT-OSS-20B",
+        short="GPT-OSS",
+        api_key="openai/gpt-oss-20b:free" if OPENAI_API_KEY.startswith("sk-or-") else "gpt-4o-mini",
+        color="bold red",
+        fallback_api_keys=["openai/gpt-4o-mini", "gpt-3.5-turbo"],
+        provider="openrouter" if OPENAI_API_KEY.startswith("sk-or-") else "openai",
+        provider_api_key=OPENAI_API_KEY,
+        base_url=PROVIDER_BASE_URLS["openrouter"] if OPENAI_API_KEY.startswith("sk-or-") else PROVIDER_BASE_URLS["openai"],
+    ),
 }
 
 C1_C2_MODEL: str = "A"
