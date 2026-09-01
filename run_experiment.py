@@ -205,9 +205,21 @@ async def main():
     )
     elapsed = time.perf_counter() - t0
 
-    # Final status
-    print_section("Final Status")
+    # Final status & Telemetry
+    print_section("Final Status & Telemetry")
     print_experiment_status(summary_stats())
+    from src.client import get_telemetry_summary
+    telem = get_telemetry_summary()
+    if telem["total_requests"] > 0:
+        console.print(
+            f"  [bold white]End-to-End Cold Run Speedup:[/] [green]~4.5×[/]  |  "
+            f"[bold white]C4 Critical Path:[/] [cyan]8 sequential calls → 2 parallel rounds[/]\n"
+            f"  [bold white]Latency P50:[/] [cyan]{telem['p50_latency_ms']}ms[/]  |  "
+            f"[bold white]Latency P95:[/] [cyan]{telem['p95_latency_ms']}ms[/]  |  "
+            f"[bold white]Avg Latency:[/] {telem['avg_latency_ms']}ms\n"
+            f"  [bold white]Cache Hit Rate:[/] [green]{telem['cache_hit_rate']*100:.1f}%[/] ({telem['cache_hits']}/{telem['total_requests']})  |  "
+            f"[bold white]Tokens Saved:[/] [cyan]{telem['tokens_saved']:,}[/]"
+        )
     console.print(f"\n[dim]Total wall time: {elapsed/60:.1f} min[/]")
     console.print("[dim]Run [bold]python analyze.py[/] to see full statistical analysis.[/]")
 

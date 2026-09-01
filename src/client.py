@@ -63,6 +63,41 @@ def make_cache_key(model_name: str, prompt: str, temperature: float, max_tokens:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+# ── Telemetry Tracking ────────────────────────────────────────────────────────
+TELEMETRY = {
+    "total_requests": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "retries": 0,
+    "failures": 0,
+    "latencies": [],
+    "tokens_saved": 0,
+}
+
+
+def get_telemetry_summary() -> dict:
+    """Return latency P50/P95, cache hit rate, and execution telemetry summary."""
+    import numpy as np
+    total = max(1, TELEMETRY["total_requests"])
+    hits = TELEMETRY["cache_hits"]
+    lats = sorted(TELEMETRY["latencies"]) if TELEMETRY["latencies"] else [0.0]
+    p50 = float(np.percentile(lats, 50)) if lats else 0.0
+    p95 = float(np.percentile(lats, 95)) if lats else 0.0
+    avg_lat = float(np.mean(lats)) if lats else 0.0
+
+    return {
+        "total_requests": TELEMETRY["total_requests"],
+        "cache_hits": hits,
+        "cache_hit_rate": round(hits / total, 4),
+        "retries": TELEMETRY["retries"],
+        "failures": TELEMETRY["failures"],
+        "avg_latency_ms": round(avg_lat, 1),
+        "p50_latency_ms": round(p50, 1),
+        "p95_latency_ms": round(p95, 1),
+        "tokens_saved": TELEMETRY["tokens_saved"],
+    }
+
+
 @dataclass
 class APIResponse:
     model_id: str
@@ -193,13 +228,17 @@ async def call_model(
         cache = _load_cache()
         if cache_key in cache:
             c = cache[cache_key]
+            tok = c.get("tokens_total", 200)
+            TELEMETRY["total_requests"] += 1
+            TELEMETRY["cache_hits"] += 1
+            TELEMETRY["tokens_saved"] += tok
             return APIResponse(
                 model_id=model_id,
                 model_name=model_cfg.name,
                 text=c["text"],
                 tokens_prompt=c.get("tokens_prompt", 100),
                 tokens_completion=c.get("tokens_completion", 100),
-                tokens_total=c.get("tokens_total", 200),
+                tokens_total=tok,
                 latency_ms=c.get("latency_ms", 5.0),
                 success=True,
                 requested_model=model_cfg.api_key,
@@ -243,6 +282,10 @@ async def call_model(
                 fallback_level=fallback_level,
                 is_mock=False,
             )
+
+            TELEMETRY["total_requests"] += 1
+            TELEMETRY["cache_misses"] += 1
+            TELEMETRY["latencies"].append(result.latency_ms)
 
             # Save to Cache
             if CACHE_ENABLED:
