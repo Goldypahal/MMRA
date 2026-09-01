@@ -39,6 +39,8 @@ class TaskResult:
     model_responses: dict = field(default_factory=dict)   # model_id -> text
     model_scores: dict = field(default_factory=dict)      # model_id -> score
     model_tokens: dict = field(default_factory=dict)      # model_id -> tokens
+    actual_models: dict = field(default_factory=dict)     # model_id -> actual model string used
+    fallbacks_used: dict = field(default_factory=dict)    # model_id -> bool
     # C4-specific
     round1_responses: dict = field(default_factory=dict)
     round2_responses: dict = field(default_factory=dict)
@@ -111,6 +113,8 @@ async def run_c1(task: Task, model_id: str = "A") -> TaskResult:
         latency_ms=round(elapsed, 1),
         model_responses={model_id: resp.text},
         model_tokens={model_id: resp.tokens_total},
+        actual_models={model_id: resp.actual_model},
+        fallbacks_used={model_id: resp.fallback_used},
     )
 
 
@@ -154,6 +158,8 @@ async def run_c2(task: Task, model_id: str = "A") -> TaskResult:
         tokens_total=tokens,
         latency_ms=round(elapsed, 1),
         model_responses={f"{model_id}_call{i}": r.text for i, r in enumerate(successes)},
+        actual_models={f"{model_id}_call{i}": r.actual_model for i, r in enumerate(successes)},
+        fallbacks_used={f"{model_id}_call{i}": r.fallback_used for i, r in enumerate(successes)},
     )
 
 
@@ -170,12 +176,15 @@ async def run_c3(task: Task) -> TaskResult:
     elapsed = (time.perf_counter() - t0) * 1000
 
     answers, model_responses, model_tokens = {}, {}, {}
+    actual_models, fallbacks_used = {}, {}
     for mid, resp in all_resps.items():
         if resp.success:
             ans = extract_final_answer(resp.text)
             answers[mid] = ans
             model_responses[mid] = resp.text
             model_tokens[mid] = resp.tokens_total
+            actual_models[mid] = resp.actual_model
+            fallbacks_used[mid] = resp.fallback_used
 
     if not answers:
         return TaskResult(
@@ -207,6 +216,8 @@ async def run_c3(task: Task) -> TaskResult:
         model_responses=model_responses,
         model_scores=model_scores,
         model_tokens=model_tokens,
+        actual_models=actual_models,
+        fallbacks_used=fallbacks_used,
     )
 
 
@@ -258,12 +269,16 @@ async def run_c4(task: Task) -> TaskResult:
     round2_answers = {}
     round2_texts = {}
     model_tokens = {}
+    actual_models = {}
+    fallbacks_used = {}
 
     for mid, resp in round2_resps.items():
         if isinstance(resp, APIResponse) and resp.success:
             ans = extract_final_answer(resp.text)
             round2_answers[mid] = ans
             round2_texts[mid] = resp.text
+            actual_models[mid] = resp.actual_model
+            fallbacks_used[mid] = resp.fallback_used
 
     # Tokens = Round1 + Round2
     for mid in MODELS:
@@ -301,6 +316,8 @@ async def run_c4(task: Task) -> TaskResult:
         model_responses=round2_texts,
         model_scores=model_scores,
         model_tokens=model_tokens,
+        actual_models=actual_models,
+        fallbacks_used=fallbacks_used,
         round1_responses=round1_texts,
         round2_responses=round2_texts,
     )

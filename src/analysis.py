@@ -353,3 +353,190 @@ def failure_mode_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     # Calculate percentage per condition
     pcts = counts.div(counts.sum(axis=1), axis=0) * 100
     return pcts.round(1)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# McNemar's Test for Paired Binary Outcomes
+# ─────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class McNemarResult:
+    cond_a: str
+    cond_b: str
+    a_correct_b_wrong: int  # b
+    a_wrong_b_correct: int  # c
+    both_correct: int       # a
+    both_wrong: int         # d
+    chi2_stat: float
+    p_value: float
+    significant: bool
+
+
+def mcnemar_test(df: pd.DataFrame, cond_a: str = "C1", cond_b: str = "C4") -> Optional[McNemarResult]:
+    """
+    McNemar's test for paired binary correctness between two conditions.
+    Uses Yates' continuity correction.
+    """
+    if df.empty:
+        return None
+
+    sub_a = df[df["condition"] == cond_a].set_index("task_id")["score"]
+    sub_b = df[df["condition"] == cond_b].set_index("task_id")["score"]
+    common = sub_a.index.intersection(sub_b.index)
+
+    if len(common) == 0:
+        return None
+
+    # Binary correctness (score >= 0.8)
+    a_corr = (sub_a.loc[common] >= 0.8).values
+    b_corr = (sub_b.loc[common] >= 0.8).values
+
+    both_corr = int(np.sum(a_corr & b_corr))
+    both_wrng = int(np.sum(~a_corr & ~b_corr))
+    a_corr_b_wrng = int(np.sum(a_corr & ~b_corr))
+    a_wrng_b_corr = int(np.sum(~a_corr & b_corr))
+
+    b = a_corr_b_wrng
+    c = a_wrng_b_corr
+
+    if (b + c) == 0:
+        chi2 = 0.0
+        p_val = 1.0
+    else:
+        # Yates continuity correction
+        chi2 = ((abs(b - c) - 1.0) ** 2) / (b + c)
+        p_val = float(stats.chi2.sf(chi2, 1))
+
+    return McNemarResult(
+        cond_a=cond_a,
+        cond_b=cond_b,
+        a_correct_b_wrong=b,
+        a_wrong_b_correct=c,
+        both_correct=both_corr,
+        both_wrong=both_wrng,
+        chi2_stat=float(chi2),
+        p_value=float(p_val),
+        significant=p_val < 0.05,
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Bootstrap 95% Confidence Intervals for Accuracy Differences
+# ─────────────────────────────────────────────────────────────────────────────
+
+def bootstrap_ci(
+    df: pd.DataFrame,
+    cond_a: str = "C1",
+    cond_b: str = "C4",
+    n_boot: int = 2000,
+    ci_level: float = 0.95,
+    random_seed: int = 42,
+) -> dict:
+    """
+    Compute 95% Bootstrap Confidence Interval for accuracy difference (Cond_B - Cond_A).
+    """
+    if df.empty:
+        return {"mean_diff": 0.0, "ci_lower": 0.0, "ci_upper": 0.0}
+
+    sub_a = df[df["condition"] == cond_a].set_index("task_id")["score"]
+    sub_b = df[df["condition"] == cond_b].set_index("task_id")["score"]
+    common = sub_a.index.intersection(sub_b.index)
+
+    if len(common) == 0:
+        return {"mean_diff": 0.0, "ci_lower": 0.0, "ci_upper": 0.0}
+
+    diffs = sub_b.loc[common].values - sub_a.loc[common].values
+    n = len(diffs)
+
+    rng = np.random.default_rng(random_seed)
+    boot_means = []
+
+    for _ in range(n_boot):
+        sample = rng.choice(diffs, size=n, replace=True)
+        boot_means.append(np.mean(sample))
+
+    alpha = 1.0 - ci_level
+    lower = float(np.percentile(boot_means, (alpha / 2.0) * 100))
+    upper = float(np.percentile(boot_means, (1.0 - alpha / 2.0) * 100))
+    mean_diff = float(np.mean(diffs))
+
+    return {
+        "mean_diff": round(mean_diff, 4),
+        "ci_lower": round(lower, 4),
+        "ci_upper": round(upper, 4),
+        "ci_level": ci_level,
+        "n_samples": n,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Multi-Agent Debate Transition Matrix (Consensus Collapse vs Self-Correction)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def debate_transitions(df: pd.DataFrame) -> dict:
+    """
+    Analyze C4 debate dynamics between Round 1 initial answers and Round 2 revisions.
+    Measures:
+    - Wrong -> Correct (Self-Correction Rate / Enlightenment)
+    - Correct -> Wrong (Consensus Collapse / Suppression Rate)
+    - Correct -> Correct (Stability Rate)
+    - Wrong -> Wrong (Persistent Error Rate)
+    """
+    c4 = df[df["condition"] == "C4"].copy()
+    if c4.empty:
+        return {}
+
+    from src.graders import grade_exact, grade_numeric, grade_contains
+    from src.tasks import ALL_TASKS
+
+    task_map = {t.id: t for t in ALL_TASKS}
+    transitions = {
+        "wrong_to_correct": 0,
+        "correct_to_wrong": 0,
+        "correct_to_correct": 0,
+        "wrong_to_wrong": 0,
+        "total_agent_revisions": 0,
+    }
+
+    for _, row in c4.iterrows():
+        t = task_map.get(row["task_id"])
+        if not t:
+            continue
+        r1 = row.get("round1_responses", {})
+        r2 = row.get("round2_responses", {})
+        if not isinstance(r1, dict) or not isinstance(r2, dict):
+            continue
+
+        for mid in r1:
+            if mid not in r2:
+                continue
+            from src.graders import extract_final_answer, grade_exact, grade_numeric
+            ans1 = extract_final_answer(r1[mid])
+            ans2 = extract_final_answer(r2[mid])
+
+            if t.grader_hint == "numeric":
+                corr1 = grade_numeric(ans1, t.answer) >= 0.8
+                corr2 = grade_numeric(ans2, t.answer) >= 0.8
+            else:
+                corr1 = grade_exact(ans1, t.answer) >= 0.8
+                corr2 = grade_exact(ans2, t.answer) >= 0.8
+
+            transitions["total_agent_revisions"] += 1
+            if not corr1 and corr2:
+                transitions["wrong_to_correct"] += 1
+            elif corr1 and not corr2:
+                transitions["correct_to_wrong"] += 1
+            elif corr1 and corr2:
+                transitions["correct_to_correct"] += 1
+            else:
+                transitions["wrong_to_wrong"] += 1
+
+    total = max(1, transitions["total_agent_revisions"])
+    return {
+        "total_revisions": transitions["total_agent_revisions"],
+        "self_correction_rate": round(transitions["wrong_to_correct"] / total, 4),
+        "consensus_collapse_rate": round(transitions["correct_to_wrong"] / total, 4),
+        "stability_rate": round(transitions["correct_to_correct"] / total, 4),
+        "persistent_error_rate": round(transitions["wrong_to_wrong"] / total, 4),
+        "counts": transitions,
+    }

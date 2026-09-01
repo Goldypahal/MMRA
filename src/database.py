@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS results (
     model_responses TEXT,     -- JSON string
     model_scores    TEXT,     -- JSON string
     model_tokens    TEXT,     -- JSON string
+    actual_models   TEXT,     -- JSON string
+    fallbacks_used  TEXT,     -- JSON string
     round1_responses TEXT,    -- JSON string
     round2_responses TEXT,    -- JSON string
     error           TEXT,
@@ -60,11 +62,15 @@ def init_db() -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute(CREATE_TABLE)
     conn.execute(CREATE_INDEX)
-    # Migration: check if failure_mode column exists
+    # Migration: check if failure_mode / actual_models / fallbacks_used columns exist
     cursor = conn.execute("PRAGMA table_info(results);")
     cols = [r[1] for r in cursor.fetchall()]
     if "failure_mode" not in cols:
         conn.execute("ALTER TABLE results ADD COLUMN failure_mode TEXT DEFAULT 'None';")
+    if "actual_models" not in cols:
+        conn.execute("ALTER TABLE results ADD COLUMN actual_models TEXT;")
+    if "fallbacks_used" not in cols:
+        conn.execute("ALTER TABLE results ADD COLUMN fallbacks_used TEXT;")
     conn.commit()
     return conn
 
@@ -94,20 +100,23 @@ def save_result(result: TaskResult, conn: Optional[sqlite3.Connection] = None) -
         return json.dumps(v) if v else "{}"
 
     failure_mode = getattr(result, "failure_mode", "None") or "None"
+    actual_models = getattr(result, "actual_models", {}) or {}
+    fallbacks_used = getattr(result, "fallbacks_used", {}) or {}
 
     conn.execute("""
         INSERT OR REPLACE INTO results
         (task_id, category, difficulty, condition, final_answer, score,
          grader_method, grader_detail, failure_mode, tokens_total, latency_ms,
-         model_responses, model_scores, model_tokens,
+         model_responses, model_scores, model_tokens, actual_models, fallbacks_used,
          round1_responses, round2_responses, error)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
         result.task_id, result.category, result.difficulty,
         result.condition, result.final_answer, result.score,
         result.grader_method, result.grader_detail, failure_mode,
         result.tokens_total, result.latency_ms,
         j(result.model_responses), j(result.model_scores), j(result.model_tokens),
+        j(actual_models), j(fallbacks_used),
         j(result.round1_responses), j(result.round2_responses),
         result.error,
     ))
@@ -135,7 +144,7 @@ def load_results() -> pd.DataFrame:
     df = pd.read_sql_query("SELECT * FROM results ORDER BY task_id, condition", conn)
     conn.close()
     # Parse JSON columns back to dicts
-    for col in ["model_responses", "model_scores", "model_tokens",
+    for col in ["model_responses", "model_scores", "model_tokens", "actual_models", "fallbacks_used",
                 "round1_responses", "round2_responses"]:
         if col in df.columns:
             df[col] = df[col].apply(lambda x: json.loads(x) if x else {})

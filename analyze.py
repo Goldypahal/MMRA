@@ -134,7 +134,40 @@ def main():
             f"No existing paper reports this agent-level contribution analysis.[/]"
         )
 
-    # ── 6. Failure Mode Breakdown ─────────────────────────────────────────
+    # ── 6. Advanced Rigor: McNemar's Test & Bootstrap CIs ─────────────────
+    print_section("Advanced Rigor — McNemar's Test & Bootstrap 95% Confidence Intervals")
+    from src.analysis import mcnemar_test, bootstrap_ci, debate_transitions
+    mcn = mcnemar_test(df, "C1", "C4")
+    boot = bootstrap_ci(df, "C1", "C4")
+    if mcn:
+        console.print(
+            f"  [bold white]McNemar's Test (C1 vs C4):[/] χ² = [cyan]{mcn.chi2_stat:.3f}[/], "
+            f"p-value = [cyan]{mcn.p_value:.4f}[/] "
+            f"([green]{'Significant' if mcn.significant else 'Not Significant'}[/])\n"
+            f"  [dim]Discordant Pairs: C1 Wrong → C4 Correct = [green]{mcn.a_wrong_b_correct}[/], "
+            f"C1 Correct → C4 Wrong = [red]{mcn.a_correct_b_wrong}[/][/]"
+        )
+    if boot:
+        console.print(
+            f"  [bold white]Bootstrap 95% CI (C4 - C1):[/] [green]+{boot['mean_diff']*100:.1f}%[/] "
+            f"([cyan]95% CI: [{boot['ci_lower']*100:.1f}%, {boot['ci_upper']*100:.1f}%][/])"
+        )
+
+    # ── 7. Multi-Agent Debate Dynamics (Consensus Collapse vs Self-Correction)
+    print_section("Multi-Agent Debate Dynamics (Consensus Collapse & Self-Correction)")
+    deb_dyn = debate_transitions(df)
+    if deb_dyn and deb_dyn.get("total_revisions", 0) > 0:
+        console.print(
+            f"  [bold white]Total Agent Revisions Evaluated:[/] {deb_dyn['total_revisions']}\n"
+            f"  [green]✓ Self-Correction Rate (Wrong → Correct):[/] [bold green]{deb_dyn['self_correction_rate']*100:.1f}%[/]\n"
+            f"  [red]⚠ Consensus Collapse Rate (Correct → Wrong):[/] [bold red]{deb_dyn['consensus_collapse_rate']*100:.1f}%[/]\n"
+            f"  [cyan]● Stability Rate (Correct → Correct):[/] {deb_dyn['stability_rate']*100:.1f}%\n"
+            f"  [dim]● Persistent Error Rate (Wrong → Wrong):[/] {deb_dyn['persistent_error_rate']*100:.1f}%"
+        )
+    else:
+        console.print("[dim]No multi-agent debate revision data available in database.[/]")
+
+    # ── 8. Failure Mode Breakdown ─────────────────────────────────────────
     print_section("Table II — Failure Mode Distribution by Condition (%)")
     fail_df = failure_mode_breakdown(df)
     if not fail_df.empty:

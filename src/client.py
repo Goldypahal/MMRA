@@ -33,24 +33,18 @@ class APIResponse:
     tokens_total: int
     latency_ms: float
     success: bool
+    requested_model: str = ""
+    actual_model: str = ""
+    fallback_used: bool = False
+    fallback_level: int = 0
+    is_mock: bool = False
     error: Optional[str] = None
 
 
-def is_mock_mode(model_cfg: Optional[ModelConfig] = None) -> bool:
-    """Return True if offline mock simulation mode is active (no API key required)."""
+def is_mock_mode() -> bool:
+    """Return True ONLY if MMRA_MOCK_MODE environment variable is explicitly set."""
     env_mock = os.getenv("MMRA_MOCK_MODE", "0").lower()
-    if env_mock in ("1", "true", "yes"):
-        return True
-    if model_cfg:
-        key = model_cfg.provider_api_key or OPENROUTER_API_KEY
-        if not key or key in ("your_openrouter_key_here", "your_openai_key_here", "your_glm_key_here", "your_gemini_key_here", "", "mock"):
-            return True
-        return False
-    has_any_key = any(
-        k and not k.startswith("your_")
-        for k in (OPENROUTER_API_KEY, OPENAI_API_KEY, GLM_API_KEY, GEMINI_API_KEY)
-    )
-    return not has_any_key
+    return env_mock in ("1", "true", "yes")
 
 
 def _make_client_for_model(model_cfg: ModelConfig, override_model_name: Optional[str] = None) -> tuple[AsyncOpenAI, str]:
@@ -79,11 +73,10 @@ async def _mock_call_model(
     prompt: str,
     system_prompt: Optional[str] = None,
 ) -> APIResponse:
-    """Generate realistic offline model reasoning and responses without API keys."""
+    """Generate realistic offline mock responses only when MMRA_MOCK_MODE=1 is set."""
     await asyncio.sleep(0.05)  # Simulate network micro-latency
     model_cfg = MODELS[model_id]
 
-    # Simple heuristic answer extraction from common task questions
     ans = "42"
     if "9.11" in prompt or "9.9" in prompt:
         ans = "9.9"
@@ -106,15 +99,12 @@ async def _mock_call_model(
     elif "circle" in prompt.lower() and "inscribed" in prompt.lower():
         ans = "12"
     else:
-        # Match numeric answers or quotes if present
         m = re.search(r'Answer:\s*([^\n\.]+)', prompt)
         if m:
             ans = m.group(1).strip()
 
-    # Model specific reasoning style
     reasoning = (
-        f"[{model_cfg.name} Reasoning]: Evaluating problem constraints step-by-step.\n"
-        f"Analyzing key variables and operational invariants...\n"
+        f"[{model_cfg.name} Mock Reasoning]: Evaluating problem constraints step-by-step.\n"
         f"Step 1: Parse input conditions.\n"
         f"Step 2: Apply mathematical/logical deduction.\n"
         f"Step 3: Deduce exact target response '{ans}'.\n\n"
@@ -130,6 +120,11 @@ async def _mock_call_model(
         tokens_total=300,
         latency_ms=85.0,
         success=True,
+        requested_model=model_cfg.api_key,
+        actual_model=f"mock-{model_cfg.api_key}",
+        fallback_used=False,
+        fallback_level=0,
+        is_mock=True,
     )
 
 
@@ -140,13 +135,14 @@ async def call_model(
     system_prompt: Optional[str] = None,
     _retry_count: int = 0,
     override_api_key: Optional[str] = None,
+    fallback_level: int = 0,
 ) -> APIResponse:
     """
-    Single async call to one model. Returns structured APIResponse.
-    Supports native direct provider API calls and 100% offline execution.
+    Single async call to one model. Returns structured APIResponse with provenance tracking.
+    Never silently falls back to mock responses unless MMRA_MOCK_MODE=1 is set.
     """
     model_cfg = MODELS[model_id]
-    if is_mock_mode(model_cfg):
+    if is_mock_mode():
         return await _mock_call_model(model_id, prompt, system_prompt)
 
     client, model_name = _make_client_for_model(model_cfg, override_model_name=override_api_key)
@@ -176,15 +172,15 @@ async def call_model(
             tokens_total=usage.total_tokens if usage else 0,
             latency_ms=round(latency, 1),
             success=True,
+            requested_model=model_cfg.api_key,
+            actual_model=model_name,
+            fallback_used=(fallback_level > 0),
+            fallback_level=fallback_level,
+            is_mock=False,
         )
 
     except Exception as e:
         err_str = str(e)
-
-        # Fallback to mock response if OpenRouter endpoint fails or API key invalid
-        if "401" in err_str or "unauthorized" in err_str.lower() or "api_key" in err_str.lower():
-            print(f"  [Notice] API key unauthorized. Falling back to offline mock model for {model_cfg.name}.")
-            return await _mock_call_model(model_id, prompt, system_prompt)
 
         # Check for 404 / 400 / credit limit / model unavailable — try fallback models if available
         is_unavailable = (
@@ -195,13 +191,19 @@ async def call_model(
             or "not found" in err_str.lower()
             or "no endpoint" in err_str.lower()
             or "credit" in err_str.lower()
+            or "401" in err_str
         )
-        if is_unavailable and not override_api_key and getattr(model_cfg, "fallback_api_keys", None):
-            for fallback_key in model_cfg.fallback_api_keys:
-                print(f"  [Fallback] {model_cfg.name} primary key ({model_name}) unavailable. Trying fallback: {fallback_key}...")
+        if is_unavailable and getattr(model_cfg, "fallback_api_keys", None):
+            fallbacks = model_cfg.fallback_api_keys
+            curr_idx = fallbacks.index(override_api_key) if override_api_key in fallbacks else -1
+            next_idx = curr_idx + 1
+            if next_idx < len(fallbacks):
+                next_fallback = fallbacks[next_idx]
+                print(f"  [Fallback] {model_cfg.name} model {model_name} unavailable. Trying fallback level {next_idx+1}: {next_fallback}...")
                 fallback_resp = await call_model(
                     model_id, prompt, temperature, system_prompt,
-                    _retry_count=_retry_count, override_api_key=fallback_key
+                    _retry_count=_retry_count, override_api_key=next_fallback,
+                    fallback_level=next_idx + 1
                 )
                 if fallback_resp.success:
                     return fallback_resp
@@ -219,11 +221,27 @@ async def call_model(
             await asyncio.sleep(wait_sec)
             return await call_model(
                 model_id, prompt, temperature, system_prompt,
-                _retry_count=_retry_count + 1, override_api_key=override_api_key
+                _retry_count=_retry_count + 1, override_api_key=override_api_key,
+                fallback_level=fallback_level
             )
 
-        # If all retries fail, return offline mock response instead of hard failing
-        return await _mock_call_model(model_id, prompt, system_prompt)
+        # On real API error when retries/fallbacks exhaust, return explicit failure APIResponse
+        return APIResponse(
+            model_id=model_id,
+            model_name=model_cfg.name,
+            text="",
+            tokens_prompt=0,
+            tokens_completion=0,
+            tokens_total=0,
+            latency_ms=0.0,
+            success=False,
+            requested_model=model_cfg.api_key,
+            actual_model=model_name,
+            fallback_used=(fallback_level > 0),
+            fallback_level=fallback_level,
+            is_mock=False,
+            error=err_str,
+        )
 
 
 async def call_all_models(
