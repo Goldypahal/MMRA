@@ -58,8 +58,8 @@ def _save_cache() -> None:
     except Exception:
         pass
 
-def make_cache_key(model_name: str, prompt: str, temperature: float, max_tokens: int) -> str:
-    raw = f"{model_name}:{prompt}:{temperature}:{max_tokens}"
+def make_cache_key(model_name: str, prompt: str, temperature: float, max_tokens: int, system_prompt: Optional[str] = None) -> str:
+    raw = f"{model_name}:{prompt}:{system_prompt or ''}:{temperature}:{max_tokens}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
@@ -188,7 +188,7 @@ async def call_model(
     client, model_name = _make_client_for_model(model_cfg, override_model_name=override_api_key)
 
     # Check Cache
-    cache_key = make_cache_key(model_name, prompt, temperature, max_tokens)
+    cache_key = make_cache_key(model_name, prompt, temperature, max_tokens, system_prompt)
     if CACHE_ENABLED:
         cache = _load_cache()
         if cache_key in cache:
