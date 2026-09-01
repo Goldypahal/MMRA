@@ -136,16 +136,31 @@ CATEGORIES: Dict[str, Category] = {
 
 DIFFICULTY_LEVELS = ["Easy", "Medium", "Hard"]
 
-# ── Experiment Parameters ─────────────────────────────────────────────────────
+# ── Experiment & Concurrency Parameters ───────────────────────────────────────
 TASKS_PER_CATEGORY: int = 20          # 20 × 7 = 140 total
 TEMPERATURE: float = 0.0              # deterministic; set to 0.7 for C2 diversity
 C2_SAMPLES: int = 3                   # self-consistency sample count
 MAX_TOKENS: int = 1024
-REQUEST_TIMEOUT: int = 60             # seconds
-MAX_RETRIES: int = 3
-RETRY_DELAY: float = 2.0              # seconds between retries
+REQUEST_TIMEOUT: int = 45             # seconds
+MAX_RETRIES: int = 2
+RETRY_DELAYS: list[float] = [1.0, 3.0] # seconds between retries
+
+MAX_CONCURRENT_REQUESTS: int = 15     # global request semaphore
+MAX_CONCURRENT_TASKS: int = 10        # concurrent task workers
+CACHE_ENABLED: bool = True
+
+CATEGORY_MAX_TOKENS = {
+    "math": 250,
+    "logic": 250,
+    "coding": 500,
+    "science": 200,
+    "language": 150,
+    "knowledge": 150,
+    "openended": 600,
+}
 
 # Results storage
 BASE_DIR = Path(__file__).resolve().parent.parent
 RESULTS_DB: str = str(BASE_DIR / "results" / "results.db")
 RESULTS_JSON: str = str(BASE_DIR / "results" / "results.json")
+CACHE_FILE: str = str(BASE_DIR / "results" / ".api_cache.json")

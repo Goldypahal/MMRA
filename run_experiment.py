@@ -41,7 +41,7 @@ if sys.platform == "win32":
 console = Console(legacy_windows=False)
 
 # Semaphore limits concurrent API calls (avoid rate-limits)
-CONCURRENCY = 3
+CONCURRENCY = MAX_CONCURRENT_TASKS
 
 
 async def run_tasks(

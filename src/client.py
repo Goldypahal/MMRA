@@ -12,15 +12,55 @@ from typing import Optional
 
 from openai import AsyncOpenAI, RateLimitError, APIStatusError
 
+import hashlib
+import json
+
 from src.config import (
     OPENROUTER_API_KEY, OPENROUTER_BASE_URL, OPENAI_API_KEY, GLM_API_KEY, GEMINI_API_KEY, COHERE_API_KEY,
-    MODELS, ModelConfig, TEMPERATURE, MAX_TOKENS, REQUEST_TIMEOUT
+    MODELS, ModelConfig, TEMPERATURE, MAX_TOKENS, REQUEST_TIMEOUT,
+    MAX_CONCURRENT_REQUESTS, CACHE_ENABLED, CACHE_FILE, RETRY_DELAYS
 )
 
 # Max retry attempts for 429 rate-limit errors
-MAX_RETRIES = 5
-# Base wait seconds for exponential backoff on 429
-BASE_WAIT = 30
+MAX_RETRIES = len(RETRY_DELAYS)
+
+_GLOBAL_SEMAPHORE: Optional[asyncio.Semaphore] = None
+
+def get_semaphore() -> asyncio.Semaphore:
+    global _GLOBAL_SEMAPHORE
+    if _GLOBAL_SEMAPHORE is None:
+        _GLOBAL_SEMAPHORE = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    return _GLOBAL_SEMAPHORE
+
+_CACHE_DATA: Optional[dict] = None
+
+def _load_cache() -> dict:
+    global _CACHE_DATA
+    if _CACHE_DATA is not None:
+        return _CACHE_DATA
+    if CACHE_ENABLED and os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                _CACHE_DATA = json.load(f)
+                return _CACHE_DATA
+        except Exception:
+            pass
+    _CACHE_DATA = {}
+    return _CACHE_DATA
+
+def _save_cache() -> None:
+    if not CACHE_ENABLED or _CACHE_DATA is None:
+        return
+    try:
+        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(_CACHE_DATA, f, indent=2)
+    except Exception:
+        pass
+
+def make_cache_key(model_name: str, prompt: str, temperature: float, max_tokens: int) -> str:
+    raw = f"{model_name}:{prompt}:{temperature}:{max_tokens}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 @dataclass
@@ -136,122 +176,162 @@ async def call_model(
     _retry_count: int = 0,
     override_api_key: Optional[str] = None,
     fallback_level: int = 0,
+    max_tokens: int = MAX_TOKENS,
 ) -> APIResponse:
     """
-    Single async call to one model. Returns structured APIResponse with provenance tracking.
-    Never silently falls back to mock responses unless MMRA_MOCK_MODE=1 is set.
+    Single async call to one model with global rate-limiting and response caching.
     """
     model_cfg = MODELS[model_id]
     if is_mock_mode():
         return await _mock_call_model(model_id, prompt, system_prompt)
 
     client, model_name = _make_client_for_model(model_cfg, override_model_name=override_api_key)
+
+    # Check Cache
+    cache_key = make_cache_key(model_name, prompt, temperature, max_tokens)
+    if CACHE_ENABLED:
+        cache = _load_cache()
+        if cache_key in cache:
+            c = cache[cache_key]
+            return APIResponse(
+                model_id=model_id,
+                model_name=model_cfg.name,
+                text=c["text"],
+                tokens_prompt=c.get("tokens_prompt", 100),
+                tokens_completion=c.get("tokens_completion", 100),
+                tokens_total=c.get("tokens_total", 200),
+                latency_ms=c.get("latency_ms", 5.0),
+                success=True,
+                requested_model=model_cfg.api_key,
+                actual_model=model_name,
+                fallback_used=(fallback_level > 0),
+                fallback_level=fallback_level,
+                is_mock=False,
+            )
+
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
 
-    try:
-        t0 = time.perf_counter()
-        resp = await client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            max_tokens=MAX_TOKENS,
-            temperature=temperature,
-        )
-        latency = (time.perf_counter() - t0) * 1000
-        text = resp.choices[0].message.content or ""
-        usage = resp.usage
+    sem = get_semaphore()
+    async with sem:
+        try:
+            t0 = time.perf_counter()
+            resp = await client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+            latency = (time.perf_counter() - t0) * 1000
+            text = resp.choices[0].message.content or ""
+            usage = resp.usage
 
-        return APIResponse(
-            model_id=model_id,
-            model_name=model_cfg.name,
-            text=text,
-            tokens_prompt=usage.prompt_tokens if usage else 0,
-            tokens_completion=usage.completion_tokens if usage else 0,
-            tokens_total=usage.total_tokens if usage else 0,
-            latency_ms=round(latency, 1),
-            success=True,
-            requested_model=model_cfg.api_key,
-            actual_model=model_name,
-            fallback_used=(fallback_level > 0),
-            fallback_level=fallback_level,
-            is_mock=False,
-        )
-
-    except Exception as e:
-        err_str = str(e)
-
-        # Check for 404 / 400 / credit limit / model unavailable — try fallback models if available
-        is_unavailable = (
-            "404" in err_str
-            or "400" in err_str
-            or "402" in err_str
-            or "unavailable" in err_str.lower()
-            or "not found" in err_str.lower()
-            or "no endpoint" in err_str.lower()
-            or "credit" in err_str.lower()
-            or "401" in err_str
-        )
-        if is_unavailable and getattr(model_cfg, "fallback_api_keys", None):
-            fallbacks = model_cfg.fallback_api_keys
-            curr_idx = fallbacks.index(override_api_key) if override_api_key in fallbacks else -1
-            next_idx = curr_idx + 1
-            if next_idx < len(fallbacks):
-                next_fallback = fallbacks[next_idx]
-                print(f"  [Fallback] {model_cfg.name} model {model_name} unavailable. Trying fallback level {next_idx+1}: {next_fallback}...")
-                fallback_resp = await call_model(
-                    model_id, prompt, temperature, system_prompt,
-                    _retry_count=_retry_count, override_api_key=next_fallback,
-                    fallback_level=next_idx + 1
-                )
-                if fallback_resp.success:
-                    return fallback_resp
-
-        # Check for 429 rate limit — retry with exponential backoff
-        is_rate_limit = (
-            "429" in err_str
-            or isinstance(e, RateLimitError)
-            or (isinstance(e, APIStatusError) and e.status_code == 429)
-        )
-
-        if is_rate_limit and _retry_count < MAX_RETRIES:
-            wait_sec = BASE_WAIT * (2 ** _retry_count)
-            print(f"  [429] {model_cfg.name} rate-limited. Waiting {wait_sec}s (attempt {_retry_count+1}/{MAX_RETRIES})...")
-            await asyncio.sleep(wait_sec)
-            return await call_model(
-                model_id, prompt, temperature, system_prompt,
-                _retry_count=_retry_count + 1, override_api_key=override_api_key,
-                fallback_level=fallback_level
+            result = APIResponse(
+                model_id=model_id,
+                model_name=model_cfg.name,
+                text=text,
+                tokens_prompt=usage.prompt_tokens if usage else 0,
+                tokens_completion=usage.completion_tokens if usage else 0,
+                tokens_total=usage.total_tokens if usage else 0,
+                latency_ms=round(latency, 1),
+                success=True,
+                requested_model=model_cfg.api_key,
+                actual_model=model_name,
+                fallback_used=(fallback_level > 0),
+                fallback_level=fallback_level,
+                is_mock=False,
             )
 
-        # On real API error when retries/fallbacks exhaust, return explicit failure APIResponse
-        return APIResponse(
-            model_id=model_id,
-            model_name=model_cfg.name,
-            text="",
-            tokens_prompt=0,
-            tokens_completion=0,
-            tokens_total=0,
-            latency_ms=0.0,
-            success=False,
-            requested_model=model_cfg.api_key,
-            actual_model=model_name,
-            fallback_used=(fallback_level > 0),
-            fallback_level=fallback_level,
-            is_mock=False,
-            error=err_str,
-        )
+            # Save to Cache
+            if CACHE_ENABLED:
+                cache = _load_cache()
+                cache[cache_key] = {
+                    "text": text,
+                    "tokens_prompt": result.tokens_prompt,
+                    "tokens_completion": result.tokens_completion,
+                    "tokens_total": result.tokens_total,
+                    "latency_ms": result.latency_ms,
+                }
+                _save_cache()
+
+            return result
+
+        except Exception as e:
+            err_str = str(e)
+
+            # Check for 404 / 400 / credit limit / model unavailable — try fallback models if available
+            is_unavailable = (
+                "404" in err_str
+                or "400" in err_str
+                or "402" in err_str
+                or "unavailable" in err_str.lower()
+                or "not found" in err_str.lower()
+                or "no endpoint" in err_str.lower()
+                or "credit" in err_str.lower()
+                or "401" in err_str
+            )
+            if is_unavailable and getattr(model_cfg, "fallback_api_keys", None):
+                fallbacks = model_cfg.fallback_api_keys
+                curr_idx = fallbacks.index(override_api_key) if override_api_key in fallbacks else -1
+                next_idx = curr_idx + 1
+                if next_idx < len(fallbacks):
+                    next_fallback = fallbacks[next_idx]
+                    print(f"  [Fallback] {model_cfg.name} model {model_name} unavailable. Trying fallback level {next_idx+1}: {next_fallback}...")
+                    fallback_resp = await call_model(
+                        model_id, prompt, temperature, system_prompt,
+                        _retry_count=_retry_count, override_api_key=next_fallback,
+                        fallback_level=next_idx + 1, max_tokens=max_tokens
+                    )
+                    if fallback_resp.success:
+                        return fallback_resp
+
+            # Check for 429 rate limit — retry with exponential backoff
+            is_rate_limit = (
+                "429" in err_str
+                or isinstance(e, RateLimitError)
+                or (isinstance(e, APIStatusError) and e.status_code == 429)
+            )
+
+            if is_rate_limit and _retry_count < MAX_RETRIES:
+                wait_sec = RETRY_DELAYS[min(_retry_count, len(RETRY_DELAYS)-1)]
+                print(f"  [429] {model_cfg.name} rate-limited. Waiting {wait_sec}s (attempt {_retry_count+1}/{MAX_RETRIES})...")
+                await asyncio.sleep(wait_sec)
+                return await call_model(
+                    model_id, prompt, temperature, system_prompt,
+                    _retry_count=_retry_count + 1, override_api_key=override_api_key,
+                    fallback_level=fallback_level, max_tokens=max_tokens
+                )
+
+            # On real API error when retries/fallbacks exhaust, return explicit failure APIResponse
+            return APIResponse(
+                model_id=model_id,
+                model_name=model_cfg.name,
+                text="",
+                tokens_prompt=0,
+                tokens_completion=0,
+                tokens_total=0,
+                latency_ms=0.0,
+                success=False,
+                requested_model=model_cfg.api_key,
+                actual_model=model_name,
+                fallback_used=(fallback_level > 0),
+                fallback_level=fallback_level,
+                is_mock=False,
+                error=err_str,
+            )
 
 
 async def call_all_models(
     prompt: str,
     temperature: float = TEMPERATURE,
     system_prompt: Optional[str] = None,
+    max_tokens: int = MAX_TOKENS,
 ) -> dict[str, APIResponse]:
     """Call all 4 models concurrently. Returns dict keyed by model_id."""
     tasks = {
-        mid: call_model(mid, prompt, temperature, system_prompt)
+        mid: call_model(mid, prompt, temperature, system_prompt, max_tokens=max_tokens)
         for mid in MODELS
     }
     results = await asyncio.gather(*tasks.values(), return_exceptions=True)

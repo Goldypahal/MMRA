@@ -12,7 +12,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional
 
-from src.config import MODELS, CONDITIONS, TEMPERATURE, C2_SAMPLES
+from src.config import MODELS, CONDITIONS, TEMPERATURE, C2_SAMPLES, CATEGORY_MAX_TOKENS
 from src.client import call_model, call_all_models, APIResponse
 from src.tasks import Task
 from src.graders import score_response, majority_vote, extract_final_answer
@@ -86,8 +86,9 @@ def build_task_prompt(task: Task) -> str:
 async def run_c1(task: Task, model_id: str = "A") -> TaskResult:
     """One model, one call at temperature=0.0."""
     t0 = time.perf_counter()
+    max_tok = CATEGORY_MAX_TOKENS.get(task.category, 250)
     resp = await call_model(model_id, build_task_prompt(task),
-                            temperature=0.0, system_prompt=SYSTEM_PROMPT)
+                            temperature=0.0, system_prompt=SYSTEM_PROMPT, max_tokens=max_tok)
     elapsed = (time.perf_counter() - t0) * 1000
 
     if not resp.success:
@@ -125,9 +126,10 @@ async def run_c1(task: Task, model_id: str = "A") -> TaskResult:
 async def run_c2(task: Task, model_id: str = "A") -> TaskResult:
     """Same model, C2_SAMPLES independent calls at temperature=0.7, majority vote."""
     t0 = time.perf_counter()
+    max_tok = CATEGORY_MAX_TOKENS.get(task.category, 250)
     calls = [
         call_model(model_id, build_task_prompt(task),
-                   temperature=0.7, system_prompt=SYSTEM_PROMPT)
+                   temperature=0.7, system_prompt=SYSTEM_PROMPT, max_tokens=max_tok)
         for _ in range(C2_SAMPLES)
     ]
     responses: list[APIResponse] = await asyncio.gather(*calls)
@@ -170,8 +172,9 @@ async def run_c2(task: Task, model_id: str = "A") -> TaskResult:
 async def run_c3(task: Task) -> TaskResult:
     """All 4 models answer independently in parallel; majority vote."""
     t0 = time.perf_counter()
+    max_tok = CATEGORY_MAX_TOKENS.get(task.category, 250)
     all_resps = await call_all_models(
-        build_task_prompt(task), temperature=0.0, system_prompt=SYSTEM_PROMPT
+        build_task_prompt(task), temperature=0.0, system_prompt=SYSTEM_PROMPT, max_tokens=max_tok
     )
     elapsed = (time.perf_counter() - t0) * 1000
 
@@ -232,10 +235,11 @@ async def run_c4(task: Task) -> TaskResult:
     Final answer: majority vote on Round 2 answers.
     """
     t0 = time.perf_counter()
+    max_tok = CATEGORY_MAX_TOKENS.get(task.category, 250)
 
     # ── Round 1 ─────────────────────────────────────────────────────────────
     round1_resps = await call_all_models(
-        build_task_prompt(task), temperature=0.0, system_prompt=SYSTEM_PROMPT
+        build_task_prompt(task), temperature=0.0, system_prompt=SYSTEM_PROMPT, max_tokens=max_tok
     )
     round1_answers = {}
     round1_texts = {}
@@ -261,7 +265,7 @@ async def run_c4(task: Task) -> TaskResult:
             your_answer=round1_answers[mid],
         )
         revision_calls[mid] = call_model(mid, debate_prompt,
-                                         temperature=0.0, system_prompt=SYSTEM_PROMPT)
+                                         temperature=0.0, system_prompt=SYSTEM_PROMPT, max_tokens=max_tok)
 
     round2_resps_list = await asyncio.gather(*revision_calls.values(), return_exceptions=True)
     round2_resps = dict(zip(revision_calls.keys(), round2_resps_list))
