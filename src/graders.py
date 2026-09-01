@@ -15,9 +15,10 @@ from src.client import call_model, APIResponse
 # ─────────────────────────────────────────────────────────────────────────────
 
 def normalize(text: str) -> str:
-    """Lowercase, strip punctuation, collapse whitespace."""
+    """Lowercase, strip trailing punctuation, collapse whitespace."""
     text = text.lower().strip()
     text = re.sub(r"[^\w\s\.\+\-\/\*\^=]", "", text)
+    text = text.strip().rstrip(".,;:")
     text = re.sub(r"\s+", " ", text)
     return text
 
