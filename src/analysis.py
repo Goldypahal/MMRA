@@ -540,3 +540,30 @@ def debate_transitions(df: pd.DataFrame) -> dict:
         "persistent_error_rate": round(transitions["wrong_to_wrong"] / total, 4),
         "counts": transitions,
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Empirical Difficulty Classification
+# ─────────────────────────────────────────────────────────────────────────────
+
+def empirical_difficulty(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Computes empirical difficulty per task based on mean accuracy across all evaluated conditions:
+    - Easy:   Accuracy > 85%
+    - Medium: 50% <= Accuracy <= 85%
+    - Hard:   Accuracy < 50%
+    """
+    if df.empty:
+        return pd.DataFrame()
+    task_acc = df.groupby(["task_id", "category"])["score"].mean().reset_index()
+
+    def label_emp_diff(acc: float) -> str:
+        if acc > 0.85:
+            return "Easy"
+        elif acc >= 0.50:
+            return "Medium"
+        else:
+            return "Hard"
+
+    task_acc["empirical_difficulty"] = task_acc["score"].apply(label_emp_diff)
+    return task_acc.sort_values("task_id").reset_index(drop=True)

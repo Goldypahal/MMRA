@@ -49,10 +49,21 @@ def grade_numeric(response: str, answer: str, tolerance: float = 0.01) -> float:
 
 def grade_contains(response: str, answer: str) -> float:
     """
-    Score 1.0 if all key tokens from answer appear anywhere in response.
-    Tokens are space-separated, case-insensitive.
+    Score 1.0 if any synonym group or key tokens appear in response.
+    Supports '|' separated alternative acceptable phrases to prevent false negatives.
     """
     resp_norm = normalize(response)
+    if "|" in answer:
+        alternatives = [normalize(a) for a in answer.split("|") if a.strip()]
+        for alt in alternatives:
+            if alt in resp_norm:
+                return 1.0
+        all_tokens = set()
+        for alt in alternatives:
+            all_tokens.update(alt.split())
+        hits = sum(1 for t in all_tokens if t in resp_norm)
+        return hits / len(all_tokens) if all_tokens else 0.0
+
     tokens = normalize(answer).split()
     if not tokens:
         return 0.0
@@ -60,7 +71,7 @@ def grade_contains(response: str, answer: str) -> float:
     return hits / len(tokens)
 
 
-JUDGE_PROMPT = """You are an impartial grader for a research experiment comparing AI models.
+JUDGE_PROMPT = """You are an impartial, blind rubric-based grader for a research experiment.
 
 Task given to the AI agent:
 {task}
@@ -71,13 +82,14 @@ The AI agent's response:
 Ground-truth expected answer / key concepts:
 {answer}
 
-Rate this response on a scale of 0-10 on these three criteria:
-1. Correctness and factual accuracy (0-4 points)
-2. Completeness: does it address all parts of the task? (0-3 points)
-3. Clarity and logical structure (0-3 points)
+Evaluate against this 5-point analytic rubric:
+1. Core Claim / Final Answer Accuracy (0-2 points)
+2. Logical Soundness & Non-contradiction (0-1 point)
+3. Epistemic Honesty / Hallucination Avoidance (0-1 point)
+4. Key Mechanism / Concept Coverage (0-1 point)
 
 Respond with ONLY a JSON object in this exact format (no other text):
-{{"score": <integer 0-10>, "reasoning": "<one sentence explaining the main strength or weakness>"}}"""
+{{"score": <integer 0-5>, "reasoning": "<one sentence summary>"}}"""
 
 
 async def grade_llm(
@@ -86,7 +98,7 @@ async def grade_llm(
     judge_model: str = "B",   # Gemma as default judge
 ) -> tuple[float, str]:
     """
-    Use an LLM as judge for open-ended tasks.
+    Use an LLM as judge with analytic rubric for open-ended tasks.
     Returns (score_0_to_1, reasoning_string).
     Runs 3 independent judge calls and averages for reliability.
     """
@@ -98,7 +110,6 @@ async def grade_llm(
         answer=task.answer,
     )
 
-    # 3 independent judge calls
     judge_tasks = [call_model(judge_model, prompt, temperature=0.0) for _ in range(3)]
     results: list[APIResponse] = await asyncio.gather(*judge_tasks)
 
@@ -109,14 +120,13 @@ async def grade_llm(
         if not r.success:
             continue
         try:
-            # Extract JSON from response
             text = r.text.strip()
-            # Handle markdown code blocks
             if "```" in text:
                 text = re.sub(r"```(?:json)?\s*", "", text).replace("```", "").strip()
             data = json.loads(text)
             raw_score = float(data.get("score", 0))
-            scores.append(min(10.0, max(0.0, raw_score)) / 10.0)
+            # 5-point rubric -> normalize 0-1
+            scores.append(min(5.0, max(0.0, raw_score)) / 5.0)
             if "reasoning" in data:
                 reasoning_samples.append(data["reasoning"])
         except Exception:
