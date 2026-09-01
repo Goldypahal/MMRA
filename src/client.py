@@ -28,7 +28,12 @@ _GLOBAL_SEMAPHORE: Optional[asyncio.Semaphore] = None
 
 def get_semaphore() -> asyncio.Semaphore:
     global _GLOBAL_SEMAPHORE
-    if _GLOBAL_SEMAPHORE is None:
+    try:
+        current_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        current_loop = None
+
+    if _GLOBAL_SEMAPHORE is None or getattr(_GLOBAL_SEMAPHORE, "_loop", None) != current_loop:
         _GLOBAL_SEMAPHORE = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
     return _GLOBAL_SEMAPHORE
 

@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from rich.console import Console
 from rich.panel import Panel
 
-from src.config import CONDITIONS, CATEGORIES, MODELS
+from src.config import CONDITIONS, CATEGORIES, MODELS, MAX_CONCURRENT_TASKS
 from src.tasks import ALL_TASKS, get_tasks_by_category, get_task_subset, get_dataset
 from src.conditions import run_condition, TaskResult
 from src.database import init_db, save_result, save_results_batch, get_completed_combos, summary_stats, clear_db
