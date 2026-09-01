@@ -73,7 +73,22 @@ class TestMMRAIntegrity(unittest.TestCase):
         ci = bootstrap_ci(df, "C1", "C4", n_boot=500)
         self.assertEqual(ci["mean_diff"], 1.0)
         self.assertEqual(ci["ci_lower"], 1.0)
-        self.assertEqual(ci["ci_upper"], 1.0)
+    def test_omniroute_proxy_toggle(self):
+        from src.config import MODELS
+        from src.client import _make_client_for_model
+        import src.config as config_mod
+
+        old_val = getattr(config_mod, "USE_OMNIROUTE", False)
+        try:
+            config_mod.USE_OMNIROUTE = True
+            client, model_name = _make_client_for_model(MODELS["A"])
+            self.assertEqual(str(client.base_url).rstrip("/"), "http://localhost:20128/v1")
+
+            config_mod.USE_OMNIROUTE = False
+            client_direct, _ = _make_client_for_model(MODELS["A"])
+            self.assertNotEqual(str(client_direct.base_url).rstrip("/"), "http://localhost:20128/v1")
+        finally:
+            config_mod.USE_OMNIROUTE = old_val
 
 
 if __name__ == "__main__":

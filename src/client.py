@@ -130,15 +130,22 @@ def is_mock_mode() -> bool:
 def _make_client_for_model(model_cfg: ModelConfig, override_model_name: Optional[str] = None) -> tuple[AsyncOpenAI, str]:
     """
     Creates an AsyncOpenAI client targeting the model's direct provider base_url and API key.
+    If USE_OMNIROUTE is enabled, routes request to local OmniRoute proxy (http://localhost:20128/v1).
     Returns (AsyncOpenAI_client, model_name_string).
     """
+    from src.config import USE_OMNIROUTE, OMNIROUTE_BASE_URL, OMNIROUTE_API_KEY
     model_name = override_model_name or model_cfg.api_key
-    base_url = model_cfg.base_url or OPENROUTER_BASE_URL
-    api_key = model_cfg.provider_api_key or OPENROUTER_API_KEY or "mock_key"
 
-    if "/" in model_name and not model_cfg.base_url:
-        base_url = OPENROUTER_BASE_URL
-        api_key = OPENROUTER_API_KEY or api_key
+    if USE_OMNIROUTE:
+        base_url = OMNIROUTE_BASE_URL
+        api_key = OMNIROUTE_API_KEY
+    else:
+        base_url = model_cfg.base_url or OPENROUTER_BASE_URL
+        api_key = model_cfg.provider_api_key or OPENROUTER_API_KEY or "mock_key"
+
+        if "/" in model_name and not model_cfg.base_url:
+            base_url = OPENROUTER_BASE_URL
+            api_key = OPENROUTER_API_KEY or api_key
 
     client = AsyncOpenAI(
         api_key=api_key,
