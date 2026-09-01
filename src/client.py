@@ -138,7 +138,7 @@ def _make_client_for_model(model_cfg: ModelConfig, override_model_name: Optional
 
     if USE_OMNIROUTE:
         base_url = OMNIROUTE_BASE_URL
-        api_key = OMNIROUTE_API_KEY
+        api_key = OMNIROUTE_API_KEY or OPENROUTER_API_KEY or "omniroute_local_key"
     else:
         base_url = model_cfg.base_url or OPENROUTER_BASE_URL
         api_key = model_cfg.provider_api_key or OPENROUTER_API_KEY or "mock_key"

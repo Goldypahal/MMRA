@@ -19,7 +19,7 @@ GLM_API_KEY: str = os.getenv("GLM_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
 OMNIROUTE_BASE_URL: str = os.getenv("OMNIROUTE_BASE_URL", "http://localhost:20128/v1")
-OMNIROUTE_API_KEY: str = os.getenv("OMNIROUTE_API_KEY", "omniroute_local_key")
+OMNIROUTE_API_KEY: str = os.getenv("OMNIROUTE_API_KEY") or OPENROUTER_API_KEY or "omniroute_local_key"
 USE_OMNIROUTE: bool = os.getenv("USE_OMNIROUTE", "0").lower() in ("1", "true", "yes")
 
 PROVIDER_BASE_URLS = {
